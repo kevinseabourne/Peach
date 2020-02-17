@@ -8,22 +8,24 @@ const BottomHeader = props => {
   const { handleBurgerClick, burgerMenu } = props;
   return (
     <BottomHeaderContainer>
-      <TitleLogoContainer>
-        <WebsiteName>Peach</WebsiteName>
-        <Logo peachIcon={peachIcon} />
-      </TitleLogoContainer>
-      <NavLinks />
-      <SearchBurgerContainer>
-        <SearchIcon searchIcon={searchIcon} />
-        <BurgerMenu
-          value={burgerMenu}
-          onClick={handleBurgerClick}
-          id="burgerMenu"
-          data-testid="burgerMenu"
-        >
-          <BurgerInner burgerMenu={burgerMenu} />
-        </BurgerMenu>
-      </SearchBurgerContainer>
+      <Wrapper>
+        <TitleLogoContainer>
+          <WebsiteName>Peach</WebsiteName>
+          <Logo peachIcon={peachIcon} />
+        </TitleLogoContainer>
+        <NavLinks />
+        <SearchBurgerContainer>
+          <SearchIcon searchIcon={searchIcon} />
+          <BurgerMenu
+            value={burgerMenu}
+            onClick={handleBurgerClick}
+            id="burgerMenu"
+            data-testid="burgerMenu"
+          >
+            <BurgerInner burgerMenu={burgerMenu} />
+          </BurgerMenu>
+        </SearchBurgerContainer>
+      </Wrapper>
     </BottomHeaderContainer>
   );
 };
@@ -32,7 +34,7 @@ export default BottomHeader;
 
 const BottomHeaderContainer = styled.div`
   height: 96px;
-  width: 1300px;
+  width: 100%;
   margin-left: auto;
   margin-right: auto;
   position: absolute;
@@ -40,7 +42,17 @@ const BottomHeaderContainer = styled.div`
   right: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
   position: relative;
+`;
+
+const Wrapper = styled.div`
+  height: 100%;
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 30px;
+  display: flex;
+  align-items: center;
 `;
 
 const TitleLogoContainer = styled.div`

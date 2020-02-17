@@ -39,12 +39,16 @@ export default TopHeader;
 const TopHeaderContainer = styled.div`
   height: 56px;
   background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 const Wrapper = styled.div`
-  width: 1300px;
   height: 100%;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 30px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
