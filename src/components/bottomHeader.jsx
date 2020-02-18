@@ -13,6 +13,14 @@ const BottomHeader = props => {
           <WebsiteName>Peach</WebsiteName>
           <Logo peachIcon={peachIcon} />
         </TitleLogoContainer>
+        <ResponsiveBurgerMenu
+          value={burgerMenu}
+          onClick={handleBurgerClick}
+          id="ResponsiveBurgerMenu"
+          data-testid="ResponsiveBurgerMenu"
+        >
+          <BurgerInner id="ResponsiveBurgerInner" burgerMenu={burgerMenu} />
+        </ResponsiveBurgerMenu>
         <NavLinks />
         <SearchBurgerContainer>
           <SearchIcon searchIcon={searchIcon} />
@@ -22,7 +30,7 @@ const BottomHeader = props => {
             id="burgerMenu"
             data-testid="burgerMenu"
           >
-            <BurgerInner burgerMenu={burgerMenu} />
+            <BurgerInner id="burgerInner" burgerMenu={burgerMenu} />
           </BurgerMenu>
         </SearchBurgerContainer>
       </Wrapper>
@@ -44,6 +52,9 @@ const BottomHeaderContainer = styled.div`
   align-items: center;
   justify-content: center;
   position: relative;
+  @media (max-width: 935px) {
+    height: 64px;
+  }
 `;
 
 const Wrapper = styled.div`
@@ -61,6 +72,11 @@ const TitleLogoContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  @media (max-width: 935px) {
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+  }
 `;
 
 const WebsiteName = styled.h3`
@@ -69,10 +85,13 @@ const WebsiteName = styled.h3`
   &:hover {
     cursor: pointer;
   }
+  @media (max-width: 935px) {
+    font-size: var(--font-size-2xl);
+  }
 `;
 
 const Logo = styled.div`
-  width: 50px;
+  width: 42px;
   height: 100%;
   background-repeat: no-repeat;
   background-position: center;
@@ -81,6 +100,9 @@ const Logo = styled.div`
   background-image: url(${props => props.peachIcon});
   &:hover {
     cursor: pointer;
+  }
+  @media (max-width: 935px) {
+    width: 32px;
   }
 `;
 
@@ -105,6 +127,24 @@ const SearchIcon = styled.div`
   }
 `;
 
+const ResponsiveBurgerMenu = styled.div`
+  display: none;
+  position: relative;
+  width: 16px;
+  height: 12px;
+  margin-left: auto;
+  z-index: 4;
+  margin-left: 32px;
+  &:hover {
+    cursor: pointer;
+    filter: invert(53%) sepia(92%) saturate(1423%) hue-rotate(183deg)
+      brightness(93%) contrast(88%);
+  }
+  @media (max-width: 935px) {
+    display: inline-block;
+  }
+`;
+
 const BurgerMenu = styled.div`
   display: inline-block;
   position: relative;
@@ -117,6 +157,9 @@ const BurgerMenu = styled.div`
     cursor: pointer;
     filter: invert(53%) sepia(92%) saturate(1423%) hue-rotate(183deg)
       brightness(93%) contrast(88%);
+  }
+  @media (max-width: 935px) {
+    display: none;
   }
 `;
 
