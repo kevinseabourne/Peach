@@ -3,13 +3,15 @@ import styled from "styled-components";
 import facebookIcon from "../images/facebook.svg";
 import twitterIcon from "../images/twitter.svg";
 import instagramIcon from "../images/instagram.svg";
+import pinterestIcon from "../images/pinterest.svg";
 
 const TopHeader = props => {
   const links = ["Home", "About", "Contact"];
   const socialNetworkIcons = [
     { link: "https://www.facebook.com/", icon: facebookIcon },
     { link: "https://twitter.com/", icon: twitterIcon },
-    { link: "https://www.instagram.com/", icon: instagramIcon }
+    { link: "https://www.instagram.com/", icon: instagramIcon },
+    { link: "https://www.pinterest.com/", icon: pinterestIcon }
   ];
   return (
     <TopHeaderContainer>
@@ -42,6 +44,9 @@ const TopHeaderContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  @media (max-width: 935px) {
+    display: none;
+  }
 `;
 
 const Wrapper = styled.div`
