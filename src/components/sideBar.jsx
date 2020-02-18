@@ -39,6 +39,7 @@ const Container = styled.div`
   bottom: 0;
   left: 0;
   visibility: hidden;
+  z-index: 200;
   transition: all 0.2s ease;
   background-color: var(--color-white);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.04);

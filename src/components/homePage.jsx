@@ -19,6 +19,7 @@ const Container = styled.section`
 
 const Wrapper = styled.div`
   height: 100%;
-  width: 1300px;
+  width: 100%;
+  max-width: 1300px;
   margin: 0 auto;
 `;

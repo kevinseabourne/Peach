@@ -39,4 +39,7 @@ const Link = styled.span`
     filter: invert(53%) sepia(92%) saturate(1423%) hue-rotate(183deg)
       brightness(93%) contrast(88%);
   }
+  @media (max-width: 935px) {
+    display: none;
+  }
 `;
