@@ -7,9 +7,9 @@ describe("Clicking on BurgerMenu", () => {
   it("should open & close the sidebar", () => {
     // Open
     const button = getByTestId("burgerMenu");
-    act(() => {
-      fireEvent.click(button);
-    });
+
+    fireEvent.click(button);
+
     // Assertion
     expect(getByTestId("sideBar")).toBeVisible();
 
