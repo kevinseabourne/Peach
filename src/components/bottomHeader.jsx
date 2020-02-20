@@ -1,8 +1,8 @@
 import React from "react";
 import styled from "styled-components";
+import HeaderSearch from "./headerSearch";
 import NavLinks from "./navLinks";
 import peachIcon from "../images/peach.svg";
-import searchIcon from "../images/search.svg";
 
 const BottomHeader = props => {
   const { handleBurgerClick, burgerMenu } = props;
@@ -21,9 +21,9 @@ const BottomHeader = props => {
         >
           <BurgerInner id="ResponsiveBurgerInner" burgerMenu={burgerMenu} />
         </ResponsiveBurgerMenu>
-        <NavLinks />
+        <NavLinks sideBar={false} />
         <SearchBurgerContainer>
-          <SearchIcon searchIcon={searchIcon} />
+          <HeaderSearch />
           <BurgerMenu
             value={burgerMenu}
             onClick={handleBurgerClick}
@@ -112,19 +112,6 @@ const SearchBurgerContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-`;
-
-const SearchIcon = styled.div`
-  width: 16px;
-  height: 16px;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-image: url(${props => props.searchIcon});
-  &:hover {
-    cursor: pointer;
-    filter: invert(53%) sepia(92%) saturate(1423%) hue-rotate(183deg)
-      brightness(93%) contrast(88%);
-  }
 `;
 
 const ResponsiveBurgerMenu = styled.div`

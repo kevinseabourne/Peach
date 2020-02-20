@@ -2,6 +2,8 @@ import React from "react";
 import styled from "styled-components";
 import peachIcon from "../images/peach.svg";
 import NewsLetter from "./newsletter";
+import SocialNetworkLinks from "./socialNetworkLinks";
+import SideBarLinks from "./sideBarLinks";
 
 const SideBar = React.forwardRef((props, ref) => {
   const { burgerMenu, handleBurgerClick } = props;
@@ -15,13 +17,19 @@ const SideBar = React.forwardRef((props, ref) => {
         <ExitButton
           value={burgerMenu}
           onClick={handleBurgerClick}
-          id="ExitButton"
-          data-testid="ExitButton"
+          id="sideBarExitButton"
+          data-testid="sideBarExitButton"
         >
           <ExitInner burgerMenu={burgerMenu} />
         </ExitButton>
       </TopSection>
+      <ResponsiveTopSection>
+        <SideBarLinks />
+      </ResponsiveTopSection>
       <NewsLetter />
+      <BottomSection>
+        <SocialNetworkLinks sideBar={true} />
+      </BottomSection>
     </Container>
   );
 });
@@ -126,5 +134,27 @@ const ExitInner = styled.div`
     background-color: var(--light-text-color-strong);
     bottom: -10px;
     transform: translate3d(0, -10px, 0) rotate(-90deg);
+  }
+`;
+
+const BottomSection = styled.div`
+  height: 65px;
+  width: 100%;
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top: 2px solid var(--light-border-color-soft);
+`;
+
+const ResponsiveTopSection = styled.div`
+  height: 100%;
+  width: 100%;
+  display: none;
+  overflow: scroll;
+  align-items: center;
+  flex-direction: column;
+  @media (max-width: 935px) {
+    display: flex;
   }
 `;

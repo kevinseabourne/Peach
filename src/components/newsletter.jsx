@@ -55,6 +55,9 @@ const NewsLetterContainer = styled.div`
   display: flex;
   flex-direction: column;
   margin: 0 32px;
+  @media (max-width: 935px) {
+    display: none;
+  }
 `;
 
 const SubHeading = styled.h3`

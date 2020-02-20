@@ -18,6 +18,9 @@
   --light-text-color-strong: rgba(0, 0, 0, 0.87);
   --light-text-color-soft: rgba(0, 0, 0, 0.38);
   --main-background-color: #fafafa;
+  --bg-color: #fafafa;
+  --bg-color-alt: #f5f5f5;
+  --bg-color-surface: #ffffff;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-lg: 1.125rem;
