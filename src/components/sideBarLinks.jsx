@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import _ from "lodash";
 import biggerArrowIcon from "../images/biggerArrowIcon.svg";
+import biggerArrowIconBlue from "../images/biggerArrowIconBlue.svg";
 
 const SideBarLinks = props => {
   const [links, setLinks] = useState([
@@ -69,6 +70,7 @@ const SideBarLinks = props => {
           <Link
             key={links.indexOf(link)}
             icon={biggerArrowIcon}
+            hoverIcon={biggerArrowIconBlue}
             onClick={() => handleDropdown(link)}
             dropdownOpen={link.dropdownOpen}
           >
@@ -121,10 +123,8 @@ const Link = styled.div`
   width: 100%;
   transition: 0.25s transform;
   transition: 0.25s background-color;
-  filter: none;
   border-left: 4px solid var(--main-background-color);
   ${props => !props.dropdownOpen} {
-    filter: none !important;
     background-color: var(--bg-color-alt);
     border-left: 4px solid var(--color-accent);
     color: var(--color-accent);
@@ -133,8 +133,9 @@ const Link = styled.div`
     cursor: pointer;
     color: var(--color-accent);
     border-color: var(--color-accent);
-    filter: invert(53%) sepia(92%) saturate(1423%) hue-rotate(183deg)
-      brightness(93%) contrast(88%);
+    &::after {
+      content: url(${props => props.hoverIcon});
+    }
   }
   &::after {
     margin: 0 auto;
@@ -147,8 +148,9 @@ const Link = styled.div`
     transition: all 0.25s;
     ${props => !props.dropdownOpen} {
       transform: rotate(-180deg);
-      filter: invert(53%) sepia(92%) saturate(1423%) hue-rotate(183deg)
-        brightness(93%) contrast(88%);
+    }
+    ${props => !props.dropdownOpen} {
+      content: url(${props => props.hoverIcon});
     }
   }
 `;
