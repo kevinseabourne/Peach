@@ -8,6 +8,12 @@ import { CSSTransition, TransitionGroup } from "react-transition-group";
 import dangerIcon from "../../images/caution.svg";
 import loadingIcon from "../../images/loadingIcon.svg";
 
+// in order to make this reusable you need to pass
+// reusableForm(data, error, updateState)
+
+// whenever a function calls setState you could call updateState(state) pass it the state that needs updadting or
+// leave state as it is and in component did mount of state is not equal to props then call updateState(state);
+
 export default class ReusableForm extends Component {
   state = {
     data: {},
@@ -17,15 +23,15 @@ export default class ReusableForm extends Component {
   validate = () => {
     const options = { abortEarly: false };
     const data = { ...this.state.data };
-    if (data.cardNumber) {
-      data.cardNumber = data.cardNumber.replace(/\s/g, ""); // clear the whitespace in the card number
-    }
+    // if (data.cardNumber) {
+    //   data.cardNumber = data.cardNumber.replace(/\s/g, ""); // clear the whitespace in the card number
+    // }
     const { error } = Joi.validate(data, this.Schema, options);
     if (!error) {
       return null;
     }
     const errors = {};
-    console.log(error.details);
+    // console.log(error.details);
     for (let item of error.details) errors[item.path[0]] = item.message;
     return errors;
   };
@@ -58,18 +64,20 @@ export default class ReusableForm extends Component {
     }
 
     const data = { ...this.state.data };
-    if (currentTarget.type === "checkbox") {
-      // you want the checkbox to toggle.
-      if (currentTarget.className !== "remain-unchecked") {
-        data[currentTarget.name] = currentTarget.checked;
-      }
-      // you want the checkbox to turn on but not off
-      else if (data[currentTarget.name] === false) {
-        data[currentTarget.name] = true;
-      }
-    } else {
-      data[currentTarget.name] = currentTarget.value;
-    }
+    // if (currentTarget.type === "checkbox") {
+    //   // you want the checkbox to toggle.
+    //   if (currentTarget.className !== "remain-unchecked") {
+    //     data[currentTarget.name] = currentTarget.checked;
+    //   }
+    //   // you want the checkbox to turn on but not off
+    //   else if (data[currentTarget.name] === false) {
+    //     data[currentTarget.name] = true;
+    //   }
+    // } else {
+    // data[currentTarget.name] = currentTarget.value;
+    // }
+
+    data[currentTarget.name] = currentTarget.value;
 
     this.setState({ data });
     // to make errors show on change setState errors. I took it off because i thought it was annoying to the user.
@@ -93,25 +101,29 @@ export default class ReusableForm extends Component {
         emailLoading={loading}
         onClick={this.handleSubmit}
       >
-        {loading ? <Loading loadingIcon={loadingIcon} /> : label}
+        {loading ? (
+          <Loading data-testid="submitLoading" loadingIcon={loadingIcon} />
+        ) : (
+          label
+        )}
       </SubmitButton>
     );
   };
 
-  renderTextBox(name, label, ref) {
-    const { data, errors } = this.state;
-    return (
-      <ReusableTextBox
-        name={name}
-        value={data[name]}
-        label={label}
-        ref={ref}
-        onChange={this.handleChange}
-        onClick={() => this.ClearInputOnClick(name, ref)}
-        error={errors[name]}
-      />
-    );
-  }
+  // renderTextBox(name, label, ref) {
+  //   const { data, errors } = this.state;
+  //   return (
+  //     <ReusableTextBox
+  //       name={name}
+  //       value={data[name]}
+  //       label={label}
+  //       ref={ref}
+  //       onChange={this.handleChange}
+  //       onClick={() => this.ClearInputOnClick(name, ref)}
+  //       error={errors[name]}
+  //     />
+  //   );
+  // }
 
   // Input with a delete icon.
 
@@ -203,32 +215,32 @@ const TextBox = styled.textarea`
   }
 `;
 
-const IconBox = styled.div`
-  width: 44px;
-  height: 100%;
-  top: 0;
-  bottom: 0;
-  right: 0px;
-  margin: auto;
-  position: absolute;
-  border-top-right-radius: 2px;
-  border-bottom-right-radius: 2px;
-  background-color: transparent;
-  background-image: url(${props => props.image});
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 31%;
-  transition: all 0.36s;
-  opacity: 0;
-  transform: rotate(100deg) scale(0);
-  &:hover {
-    cursor: pointer;
-  }
-  ${props => !props.value} {
-    opacity: 1;
-    transform: rotate(0deg) scale(1);
-  }
-`;
+// const IconBox = styled.div`
+//   width: 44px;
+//   height: 100%;
+//   top: 0;
+//   bottom: 0;
+//   right: 0px;
+//   margin: auto;
+//   position: absolute;
+//   border-top-right-radius: 2px;
+//   border-bottom-right-radius: 2px;
+//   background-color: transparent;
+//   background-image: url(${props => props.image});
+//   background-position: center;
+//   background-repeat: no-repeat;
+//   background-size: 31%;
+//   transition: all 0.36s;
+//   opacity: 0;
+//   transform: rotate(100deg) scale(0);
+//   &:hover {
+//     cursor: pointer;
+//   }
+//   ${props => !props.value} {
+//     opacity: 1;
+//     transform: rotate(0deg) scale(1);
+//   }
+// `;
 
 const Error = styled.div`
   width: 100%;
@@ -323,40 +335,40 @@ const shakeBottom = keyframes`
   }
 `;
 
-const Image = styled.div`
-  height: 22px;
-  width: 24px;
-  margin-left: 6px;
-  margin-right: 12px;
-  background: url(${props => props.image});
-  background-position: center;
-  background-size: contain;
-  background-repeat: no-repeat;
-  opacity: 0;
-  transiton: all 0.3s ease;
-  &:hover {
-    animation: ${shakeBottom} 0.8s cubic-bezier(0.455, 0.03, 0.515, 0.955)
-      infinite both;
-  }
-  ${props => !props.error} {
-    opacity: 1;
-    animation: ${jelloHorizontal} 0.9s;
-  }
-`;
-
-const ErrorMessage = styled.p`
-  color: white;
-  margin: 0.57143em 0 0.28571em;
-  line-height: 18px;
-  font-weigth: 300;
-  font-size: 14px;
-  /* opacity: 0; */
-  transition: all 0.3s ease;
-  &:hover {
-    cursor: default;
-  }
-  ${props => !props.error} {
-    opacity: 1;
-}
-  }
-`;
+// const Image = styled.div`
+//   height: 22px;
+//   width: 24px;
+//   margin-left: 6px;
+//   margin-right: 12px;
+//   background: url(${props => props.image});
+//   background-position: center;
+//   background-size: contain;
+//   background-repeat: no-repeat;
+//   opacity: 0;
+//   transiton: all 0.3s ease;
+//   &:hover {
+//     animation: ${shakeBottom} 0.8s cubic-bezier(0.455, 0.03, 0.515, 0.955)
+//       infinite both;
+//   }
+//   ${props => !props.error} {
+//     opacity: 1;
+//     animation: ${jelloHorizontal} 0.9s;
+//   }
+// `;
+//
+// const ErrorMessage = styled.p`
+//   color: white;
+//   margin: 0.57143em 0 0.28571em;
+//   line-height: 18px;
+//   font-weigth: 300;
+//   font-size: 14px;
+//   /* opacity: 0; */
+//   transition: all 0.3s ease;
+//   &:hover {
+//     cursor: default;
+//   }
+//   ${props => !props.error} {
+//     opacity: 1;
+// }
+//   }
+// `;
