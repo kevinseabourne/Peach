@@ -12,7 +12,8 @@ class Newsletter extends ReusableForm {
     data: {
       email: ""
     },
-    errors: {}
+    errors: {},
+    emailLoading: false
   };
 
   Schema = {
@@ -32,7 +33,12 @@ class Newsletter extends ReusableForm {
       })
   };
 
-  doSubmit = async () => {};
+  doSubmit = async () => {
+    this.setState({ emailLoading: true });
+    setTimeout(() => {
+      this.setState({ emailLoading: false });
+    }, 3000);
+  };
 
   render() {
     return (
@@ -43,7 +49,7 @@ class Newsletter extends ReusableForm {
           inbox.
         </Message>
         {this.renderInput("email", "Your email address", "", this.emailRef)}
-        {this.renderSubscribeButton("Subscribe", this.state.emailSent)}
+        {this.renderSubscribeButton("Subscribe", this.state.emailLoading)}
       </NewsLetterContainer>
     );
   }

@@ -26,7 +26,9 @@ export const ReusableInput = React.forwardRef((props, ref) => {
     <Container>
       {title && <Title>{label}</Title>}
       <InputContainer error={error}>
-        <InnerLabel value={value.length >= 1}>{label}</InnerLabel>
+        <InnerLabel data-testid="inputLabel" value={value.length >= 1}>
+          {label}
+        </InnerLabel>
         <Input
           {...rest}
           ref={ref}
@@ -48,7 +50,7 @@ export const ReusableInput = React.forwardRef((props, ref) => {
       <TransitionGroup component={null}>
         {error && (
           <CSSTransition
-            in={error}
+            in={error ? true : false}
             classNames="errorAnimation"
             timeout={200}
             unmountOnExit
