@@ -93,6 +93,16 @@ export default class ReusableForm extends Component {
     ref.current.focus();
   };
 
+  CloseInputErrorBox = (name, ref) => {
+    const errors = { ...this.state.errors };
+    errors[name] = "";
+
+    this.setState({ errors });
+
+    // after clearing the input put the input back into focus.
+    ref.current.focus();
+  };
+
   renderSubscribeButton = (label, loading) => {
     return (
       <SubmitButton
@@ -137,7 +147,8 @@ export default class ReusableForm extends Component {
         label={label}
         ref={ref}
         onChange={this.handleChange}
-        onClick={() => this.ClearInputOnClick(name, ref)}
+        onClickIconBox={() => this.ClearInputOnClick(name, ref)}
+        onClickErrorBox={() => this.CloseInputErrorBox(name, ref)}
         error={errors[name]}
         maxLength={maxLength}
       />
@@ -149,17 +160,17 @@ const Container = styled.div``;
 
 const SubmitButton = styled.button`
   min-width: 91.3px;
-  min-height: 49px;
-  font-size: 1.1em;
-  padding: 14px 24px;
-  border-radius: 40px;
+  min-height: 40px;
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  padding: 9px 24px;
   border: none;
   color: #f5f5eb;
-  margin-top: 30px;
+  margin-top: 16px;
   font-weight: 700;
   box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
   background-color: #08aeea;
-  background: linear-gradient(0deg, #02aab0 0%, #00cdac 100%);
+  background: var(--color-accent);
   -webkit-transform: translateY(0px) scale(1);
   -ms-transform: translateY(0px) scale(1);
   transform: translateY(0px) scale(1);
@@ -168,7 +179,6 @@ const SubmitButton = styled.button`
   position: relative;
   &:hover {
     box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
-    transform: scale(1) translateY(-3.5px);
     cursor: pointer;
   }
   &:focus {
