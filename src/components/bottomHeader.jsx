@@ -3,13 +3,22 @@ import styled from "styled-components";
 import HeaderSearch from "./headerSearch";
 import NavLinks from "./navLinks";
 import peachIcon from "../images/peach.svg";
+import { useHistory } from "react-router-dom";
 
 const BottomHeader = props => {
+  const history = useHistory();
   const { handleBurgerClick, burgerMenu } = props;
+
+  const handleRouteChange = () => {
+    history.push("/");
+  };
   return (
     <BottomHeaderContainer>
       <Wrapper>
-        <TitleLogoContainer>
+        <TitleLogoContainer
+          data-testid="titleLogo"
+          onClick={() => handleRouteChange()}
+        >
           <WebsiteName>Peach</WebsiteName>
           <Logo peachIcon={peachIcon} />
         </TitleLogoContainer>
@@ -112,6 +121,7 @@ const SearchBurgerContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-left: auto;
 `;
 
 const ResponsiveBurgerMenu = styled.div`

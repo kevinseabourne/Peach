@@ -1,16 +1,31 @@
 import React from "react";
 import styled from "styled-components";
 import SocialNetworkLinks from "./socialNetworkLinks";
+import { useHistory } from "react-router-dom";
 
 const TopHeader = props => {
-  const links = ["Home", "About", "Contact"];
+  const history = useHistory();
+  const links = ["home", "about", "contact"];
+
+  const handleRouteChange = link => {
+    if (link === "home") {
+      history.push("/");
+    } else {
+      history.push(`/${link}`);
+    }
+  };
 
   return (
     <TopHeaderContainer>
       <Wrapper>
         <TopNavLinks>
           {links.map(link => (
-            <Link key={links.indexOf(link)}>{link}</Link>
+            <Link
+              onClick={() => handleRouteChange(link)}
+              key={links.indexOf(link)}
+            >
+              {link}
+            </Link>
           ))}
         </TopNavLinks>
         <SocialNetworkLinks sideBar={false} />

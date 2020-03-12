@@ -3,8 +3,10 @@ import styled from "styled-components";
 import _ from "lodash";
 import biggerArrowIcon from "../images/biggerArrowIcon.svg";
 import biggerArrowIconBlue from "../images/biggerArrowIconBlue.svg";
+import { useHistory } from "react-router-dom";
 
 const SideBarLinks = props => {
+  const history = useHistory();
   const [links, setLinks] = useState([
     {
       title: "Electronics",
@@ -42,10 +44,15 @@ const SideBarLinks = props => {
     },
     {
       title: "Health & Fitness",
-      subLinks: [{ title: "All Home & Fitness", link: "/heath-fitness" }],
+      subLinks: [{ title: "All Health & Fitness", link: "/heath-fitness" }],
       dropdownOpen: false
     }
   ]);
+
+  const handleLinkRoute = subLink => {
+    history.push(subLink.link, { subLink: subLink.title });
+    // so if routes changes get useMatch or useLocation see if location has changed then close the sidebar.
+  };
 
   const handleDropdown = link => {
     const linksClone = _.cloneDeep(links);
@@ -73,6 +80,7 @@ const SideBarLinks = props => {
             hoverIcon={biggerArrowIconBlue}
             onClick={() => handleDropdown(link)}
             dropdownOpen={link.dropdownOpen}
+            data-testid={`sideBar${link.title}Link`}
           >
             {link.title}
           </Link>
@@ -81,7 +89,11 @@ const SideBarLinks = props => {
             data-testid={`sideBar${link.title}Dropdown`}
           >
             {link.subLinks.map(subLink => (
-              <SubLinks key={link.subLinks.indexOf(subLink)}>
+              <SubLinks
+                key={link.subLinks.indexOf(subLink)}
+                onClick={() => handleLinkRoute(subLink)}
+                data-testid={`sideBarSubLink${link.title}`}
+              >
                 {subLink.title}
               </SubLinks>
             ))}
