@@ -36,7 +36,7 @@ describe("error message should appears when you fail to meet validation requirem
     // ------- assertions ---------- //
 
     // expect error messages to appear in the DOM.
-    wait(() => expect(getByTestId("email-errorMessage")).toBeInTheDocument());
+    expect(getByTestId("email-errorMessage")).toBeInTheDocument();
 
     // input values should not change.
     expect(emailInput.value).toBe("");
@@ -54,14 +54,18 @@ describe("error message should appears when you fail to meet validation requirem
     // ------- assertions ---------- //
 
     // expect error messages to appear in the DOM.
-    wait(() => expect(getByTestId("email-errorMessage")).toBeInTheDocument());
+    expect(getByTestId("email-errorMessage")).toBeInTheDocument();
 
     // input values should not change.
     expect(emailInput.value).toBe("test@hotmail");
   });
+});
 
-  it("should meet validation requirements and not show an error message", () => {
-    const { getByPlaceholderText, getByTestId } = render(<NewsLetter />);
+describe("pass validation", () => {
+  it("should meet validation requirements and not show an error message", async () => {
+    const { getByPlaceholderText, getByTestId, queryByTestId } = render(
+      <NewsLetter />
+    );
     const emailInput = getByPlaceholderText("Your email address");
 
     fireEvent.change(emailInput, { target: { value: "test@hotmail.com" } });
@@ -71,14 +75,43 @@ describe("error message should appears when you fail to meet validation requirem
 
     // ------- assertions ---------- //
 
-    // expect error messages to appear in the DOM.
-    wait(() =>
-      expect(getByTestId("email-errorMessage")).not.toBeInTheDocument()
+    // expect error messages not to appear in the DOM.
+    await wait(() =>
+      expect(queryByTestId("email-errorMessage")).not.toBeInTheDocument()
     );
   });
+});
 
-  it("should show a loading spinner inside the submit button after validation has been met", () => {
-    const { getByPlaceholderText, getByTestId } = render(<NewsLetter />);
+describe("close error message", () => {
+  it("should close the error message when clicking on it", async () => {
+    const { getByPlaceholderText, getByTestId, queryByTestId } = render(
+      <NewsLetter />
+    );
+    const emailInput = getByPlaceholderText("Your email address");
+
+    fireEvent.change(emailInput, { target: { value: "test@h" } });
+
+    const subscribeButton = getByTestId("Subscribe");
+    fireEvent.click(subscribeButton);
+
+    const errorMessage = getByTestId("email-errorMessage");
+    await wait(() =>
+      expect(queryByTestId("email-errorMessage")).toBeInTheDocument()
+    );
+
+    fireEvent.click(errorMessage);
+
+    // ------- assertions ---------- //
+    await wait(() =>
+      expect(queryByTestId("email-errorMessage")).not.toBeInTheDocument()
+    );
+    expect(emailInput).toHaveFocus();
+  });
+
+  it("should show a loading spinner inside the submit button after validation has been met and the loading spinner should leave once http request has been made", async () => {
+    const { getByPlaceholderText, getByTestId, queryByTestId } = render(
+      <NewsLetter />
+    );
     const emailInput = getByPlaceholderText("Your email address");
 
     fireEvent.change(emailInput, { target: { value: "test@hotmail.com" } });
@@ -89,6 +122,11 @@ describe("error message should appears when you fail to meet validation requirem
     // ------- assertions ---------- //
 
     // expect error messages to appear in the DOM.
-    wait(() => expect(getByTestId("submitLoading")).toBeInTheDocument());
+    expect(getByTestId("submitLoading")).toBeInTheDocument();
+
+    // expect error messages to dissapear after request has been made.
+    await wait(() =>
+      expect(queryByTestId("submitLoading")).not.toBeInTheDocument()
+    );
   });
 });
