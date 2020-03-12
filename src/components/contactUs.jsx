@@ -3,8 +3,8 @@ import styled from "styled-components";
 
 const ContactUs = props => {
   return (
-    <Container>
-      <Wrapper></Wrapper>
+    <Container data-testid="contactPage">
+      <Wrapper>Contact Us</Wrapper>
     </Container>
   );
 };

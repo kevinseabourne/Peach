@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 const HomePage = props => {
   return (
-    <Container>
+    <Container data-testid="homePage">
       <Wrapper></Wrapper>
     </Container>
   );

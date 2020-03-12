@@ -1,5 +1,6 @@
 import React from "react";
-import styled from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
+import { Route } from "react-router-dom";
 import peachIcon from "../images/peach.svg";
 import NewsLetter from "./newsletter";
 import SocialNetworkLinks from "./socialNetworkLinks";
@@ -8,35 +9,38 @@ import SideBarLinks from "./sideBarLinks";
 const SideBar = React.forwardRef((props, ref) => {
   const { burgerMenu, handleBurgerClick } = props;
   return (
-    <Container burgerMenu={burgerMenu} ref={ref} data-testid="sideBar">
-      <TopSection>
-        <TitleLogoContainer>
-          <WebsiteName>Peach</WebsiteName>
-          <Logo peachIcon={peachIcon} />
-        </TitleLogoContainer>
-        <ExitButton
-          value={burgerMenu}
-          onClick={handleBurgerClick}
-          id="sideBarExitButton"
-          data-testid="sideBarExitButton"
-        >
-          <ExitInner burgerMenu={burgerMenu} />
-        </ExitButton>
-      </TopSection>
-      <ResponsiveTopSection>
-        <SideBarLinks />
-      </ResponsiveTopSection>
-      <NewsLetter />
-      <BottomSection>
-        <SocialNetworkLinks sideBar={true} />
-      </BottomSection>
-    </Container>
+    <React.Fragment>
+      <SideBarContainer burgerMenu={burgerMenu} ref={ref} data-testid="sideBar">
+        <TopSection>
+          <TitleLogoContainer>
+            <WebsiteName>Peach</WebsiteName>
+            <Logo peachIcon={peachIcon} />
+          </TitleLogoContainer>
+          <ExitButton
+            value={burgerMenu}
+            onClick={handleBurgerClick}
+            id="sideBarExitButton"
+            data-testid="sideBarExitButton"
+          >
+            <ExitInner burgerMenu={burgerMenu} />
+          </ExitButton>
+        </TopSection>
+        <ResponsiveTopSection burgerMenu={burgerMenu}>
+          <SideBarLinks />
+        </ResponsiveTopSection>
+        <NewsLetter />
+        <BottomSection>
+          <SocialNetworkLinks sideBar={true} />
+        </BottomSection>
+      </SideBarContainer>
+      {burgerMenu && <Overlay burgerMenu={burgerMenu} />}
+    </React.Fragment>
   );
 });
 
 export default SideBar;
 
-const Container = styled.div`
+const SideBarContainer = styled.div`
   height: 100vh;
   width: 350px;
   position: fixed;
@@ -54,6 +58,9 @@ const Container = styled.div`
   ${props => !props.burgerMenu} {
     visibility: visible;
     transform: translateX(0%);
+    body:not(&) {
+      overflow: hidden;
+    }
   }
 `;
 
@@ -157,4 +164,15 @@ const ResponsiveTopSection = styled.div`
   @media (max-width: 935px) {
     display: flex;
   }
+`;
+
+const Overlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  overflow: hidden;
+  transition: all 0.25s;
+  background-color: transparent;
 `;

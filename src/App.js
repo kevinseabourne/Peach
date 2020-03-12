@@ -1,11 +1,10 @@
 import React from "react";
-import { Route, Redirect, Switch, BrowserRouter } from "react-router-dom";
+import { Route, Redirect, Switch } from "react-router-dom";
 import Header from "./components/header";
-import Electronics from "./components/electronics";
-import Home from "./components/home";
-import HealthFitness from "./components/healthFitness";
-import Travel from "./components/travel";
+import About from "./components/about";
+import ContactUs from "./components/contactUs";
 import HomePage from "./components/homePage";
+import SubLinkPage from "./components/subLinkPage";
 import Footer from "./components/footer";
 import NotFound from "./components/notFound";
 import styled from "styled-components";
@@ -13,29 +12,35 @@ import "./App.css";
 
 function App() {
   return (
-    <React.Fragment>
+    <main>
       <Header />
       <Container>
-        <BrowserRouter>
-          <Switch>
-            <Route path="/" exact render={props => <HomePage {...props} />} />
-            <Route
-              path="/electronics"
-              render={props => <Electronics {...props} />}
-            />
-            <Route path="/home" render={props => <Home {...props} />} />
-            <Route
-              path="/health-fitness"
-              render={props => <HealthFitness {...props} />}
-            />
-            <Route path="/travel" render={props => <Travel {...props} />} />
-            <Route path="/not-found" component={NotFound} />
-            <Redirect to="/not-found" />
-          </Switch>
-        </BrowserRouter>
+        <Switch>
+          <Route path="/" exact render={props => <HomePage {...props} />} />
+          <Route exact path="/about" render={props => <About {...props} />} />
+          <Route
+            exact
+            path="/contact"
+            render={props => <ContactUs {...props} />}
+          />
+          <Route
+            path="/electronics/:sublink?"
+            render={props => <SubLinkPage {...props} />}
+          />
+          <Route
+            path="/home/:sublink?"
+            render={props => <SubLinkPage {...props} />}
+          />
+          <Route
+            path="/health-fitness/:sublink?"
+            render={props => <SubLinkPage {...props} />}
+          />
+          <Route path="/not-found" component={NotFound} />
+          <Redirect to="/not-found" />
+        </Switch>
       </Container>
       <Footer />
-    </React.Fragment>
+    </main>
   );
 }
 

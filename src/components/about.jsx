@@ -3,8 +3,8 @@ import styled from "styled-components";
 
 const About = props => {
   return (
-    <Container>
-      <Wrapper>about</Wrapper>
+    <Container data-testid="aboutPage">
+      <Wrapper>About</Wrapper>
     </Container>
   );
 };
