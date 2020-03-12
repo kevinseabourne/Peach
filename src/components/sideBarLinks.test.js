@@ -1,10 +1,54 @@
 import React from "react";
 import SideBarLinks from "./sideBarLinks";
+import { Router } from "react-router-dom";
+import { createMemoryHistory } from "history";
 import { render, fireEvent } from "@testing-library/react";
 
-describe("Clicking on BurgerMenu", () => {
-  const { getByText, getByTestId, queryByTestId } = render(<SideBarLinks />);
-  it("should open & close the dropdown when clicking on a link", () => {
+describe("Sidebar Links", () => {
+  test.each([
+    ["Electronics", "All Electronics", "Electronics"],
+    ["Electronics", "Routers", "Electronics"],
+    ["Home", "All Home", "Home"],
+    ["Health & Fitness", "All Health & Fitness", "Health & Fitness"]
+  ])(
+    "should open & close link dropdowns and subLinks should appear",
+    (linkName, subLinkName, expected) => {
+      const history = createMemoryHistory();
+      const { getByText, getByTestId } = render(
+        <Router history={history}>
+          <SideBarLinks />
+        </Router>
+      );
+      // Open
+      const link = getByText(linkName);
+
+      fireEvent.click(link);
+
+      // Assertion
+      expect(getByTestId(`sideBar${linkName}Dropdown`)).toBeVisible();
+
+      const subLink = getByText(subLinkName);
+
+      // expect sublink to appear after clicking on dropdown links
+      fireEvent.click(subLink);
+
+      // Close
+      fireEvent.click(link);
+
+      // Assertion
+      expect(getByTestId(`sideBar${expected}Dropdown`)).not.toBeVisible();
+    }
+  );
+});
+
+describe("Clicking on links", () => {
+  it("should leave dropdown links open, when clicking on other dropdown links", () => {
+    const history = createMemoryHistory();
+    const { getByText, getByTestId } = render(
+      <Router history={history}>
+        <SideBarLinks />
+      </Router>
+    );
     // Open
     const electronicsLink = getByText("Electronics");
     const homeLink = getByText("Home");
@@ -18,15 +62,5 @@ describe("Clicking on BurgerMenu", () => {
     expect(getByTestId("sideBarElectronicsDropdown")).toBeVisible();
     expect(getByTestId("sideBarHomeDropdown")).toBeVisible();
     expect(getByTestId("sideBarHealth & FitnessDropdown")).toBeVisible();
-
-    // Close
-    fireEvent.click(electronicsLink);
-    fireEvent.click(homeLink);
-    fireEvent.click(healthFitnessLink);
-
-    // Assertion
-    expect(getByTestId("sideBarElectronicsDropdown")).not.toBeVisible();
-    expect(getByTestId("sideBarHomeDropdown")).not.toBeVisible();
-    expect(getByTestId("sideBarHealth & FitnessDropdown")).not.toBeVisible();
   });
 });
