@@ -16,6 +16,10 @@ class Newsletter extends ReusableForm {
     emailLoading: false
   };
 
+  componentWillUnmount() {
+    clearTimeout(this.timer);
+  }
+
   Schema = {
     email: Joi.string()
       .required()
@@ -24,7 +28,7 @@ class Newsletter extends ReusableForm {
         language: {
           key: "",
           any: {
-            empty: "Enter a email"
+            empty: "Enter an email"
           },
           string: {
             email: "Enter a valid email"
@@ -33,9 +37,9 @@ class Newsletter extends ReusableForm {
       })
   };
 
-  doSubmit = async () => {
+  doSubmit = () => {
     this.setState({ emailLoading: true });
-    setTimeout(() => {
+    this.timer = setTimeout(() => {
       this.setState({ emailLoading: false });
     }, 3000);
   };
