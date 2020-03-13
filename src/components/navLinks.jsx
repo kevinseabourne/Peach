@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import _ from "lodash";
 import arrowIcon from "../images/arrow.svg";
-import biggerArrowIcon from "../images/biggerArrowIcon.svg";
 import { useHistory } from "react-router-dom";
 
 const NavLinks = props => {
   const history = useHistory();
-  const [links, setLinks] = useState([
+  const [links] = useState([
     {
       title: "Electronics",
       subLinks: [

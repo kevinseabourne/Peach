@@ -110,6 +110,7 @@ const SearchOverlay = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 200;
   background-color: var(--color-black);
   &.searchOverlay-enter {
     opacity: 0;

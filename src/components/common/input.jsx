@@ -1,5 +1,5 @@
 import React from "react";
-import styled, { keyframes } from "styled-components";
+import styled from "styled-components";
 import crossIcon from "../../images/cross-icon.svg";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import errorIcon from "../../images/error.svg";
@@ -99,15 +99,6 @@ const InputContainer = styled.div`
   ${props => !props.error} {
     margin-bottom: 0px;
   }
-`;
-
-const blurImage = keyframes`
-from {
-opacity: 0;
-}
-to {
-opacity: 1;
-}
 `;
 
 const Input = styled.input`

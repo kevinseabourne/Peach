@@ -130,7 +130,7 @@ const ResponsiveBurgerMenu = styled.div`
   width: 16px;
   height: 12px;
   margin-left: auto;
-  z-index: 4;
+  z-index: 40;
   margin-left: 32px;
   &:hover {
     cursor: pointer;
@@ -148,7 +148,7 @@ const BurgerMenu = styled.div`
   width: 16px;
   height: 12px;
   margin-left: auto;
-  z-index: 4;
+  z-index: 40;
   margin-left: 32px;
   &:hover {
     cursor: pointer;

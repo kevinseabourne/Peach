@@ -1,6 +1,5 @@
 import React from "react";
-import styled, { createGlobalStyle } from "styled-components";
-import { Route } from "react-router-dom";
+import styled from "styled-components";
 import peachIcon from "../images/peach.svg";
 import NewsLetter from "./newsletter";
 import SocialNetworkLinks from "./socialNetworkLinks";

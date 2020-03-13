@@ -1,11 +1,7 @@
 import React, { Component } from "react";
 import Joi from "joi-browser";
 import { ReusableInput } from "./input";
-import { ReusableTextBox } from "./textBox";
-import crossIcon from "../../images/cross-icon.svg";
-import styled, { keyframes } from "styled-components";
-import { CSSTransition, TransitionGroup } from "react-transition-group";
-import dangerIcon from "../../images/caution.svg";
+import styled from "styled-components";
 import loadingIcon from "../../images/loadingIcon.svg";
 
 // in order to make this reusable you need to pass
@@ -156,7 +152,7 @@ export default class ReusableForm extends Component {
   }
 }
 
-const Container = styled.div``;
+// const Container = styled.div``;
 
 const SubmitButton = styled.button`
   min-width: 91.3px;
@@ -202,28 +198,28 @@ const Loading = styled.div`
   background-size: 42%;
 `;
 
-const Title = styled.label`
-  font-size: 1.26rem;
-  font-weight: 700;
-`;
-
-const TextBox = styled.textarea`
-  height: 200px;
-  width: 100%;
-  border: none;
-  margin-top: 6.2px;
-  margin-bottom: -6.2px;
-  font-size: 14px;
-  font-weight: 500;
-  color: rgb(51, 51, 51);
-  border-radius: 12px;
-  padding: 12px;
-  box-sizing: border-box;
-  box-shadow: 12px 12px 20px -12px rgba(0, 0, 0, 0.35);
-  &:focus {
-    outline: 0;
-  }
-`;
+// const Title = styled.label`
+//   font-size: 1.26rem;
+//   font-weight: 700;
+// `;
+//
+// const TextBox = styled.textarea`
+//   height: 200px;
+//   width: 100%;
+//   border: none;
+//   margin-top: 6.2px;
+//   margin-bottom: -6.2px;
+//   font-size: 14px;
+//   font-weight: 500;
+//   color: rgb(51, 51, 51);
+//   border-radius: 12px;
+//   padding: 12px;
+//   box-sizing: border-box;
+//   box-shadow: 12px 12px 20px -12px rgba(0, 0, 0, 0.35);
+//   &:focus {
+//     outline: 0;
+//   }
+// `;
 
 // const IconBox = styled.div`
 //   width: 44px;
@@ -252,98 +248,33 @@ const TextBox = styled.textarea`
 //   }
 // `;
 
-const Error = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin: 5px 0px;
-  &.errorAnimation-enter {
-    transform: scale(0.4);
-    opacity: 0;
-    transition: all 0.1s linear;
-  }
-  &.errorAnimation-enter-active {
-    transform: scale(1);
-    transition: all 0.1s linear;
-    opacity: 1;
-  }
-  &.errorAnimation-exit {
-    transform: scale(1);
-    transition: all 0.1s linear;
-    opacity: 1;
-  }
-  &.errorAnimation-exit-active {
-    transform: scale(0.4);
-    opacity: 0;
-    transition: all 0.1s linear;
-  }
-`;
-
-const jelloHorizontal = keyframes`
-  0% {
-    -webkit-transform: scale3d(1, 1, 1);
-            transform: scale3d(1, 1, 1);
-  }
-  30% {
-    -webkit-transform: scale3d(1.25, 0.75, 1);
-            transform: scale3d(1.25, 0.75, 1);
-  }
-  40% {
-    -webkit-transform: scale3d(0.75, 1.25, 1);
-            transform: scale3d(0.75, 1.25, 1);
-  }
-  50% {
-    -webkit-transform: scale3d(1.15, 0.85, 1);
-            transform: scale3d(1.15, 0.85, 1);
-  }
-  65% {
-    -webkit-transform: scale3d(0.95, 1.05, 1);
-            transform: scale3d(0.95, 1.05, 1);
-  }
-  75% {
-    -webkit-transform: scale3d(1.05, 0.95, 1);
-            transform: scale3d(1.05, 0.95, 1);
-  }
-  100% {
-    -webkit-transform: scale3d(1, 1, 1);
-            transform: scale3d(1, 1, 1);
-  }
-`;
-
-const shakeBottom = keyframes`
-  0%,
-  100% {
-    -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
-    -webkit-transform-origin: 50% 100%;
-            transform-origin: 50% 100%;
-  }
-  10% {
-    -webkit-transform: rotate(2deg);
-            transform: rotate(2deg);
-  }
-  20%,
-  40%,
-  60% {
-    -webkit-transform: rotate(-4deg);
-            transform: rotate(-4deg);
-  }
-  30%,
-  50%,
-  70% {
-    -webkit-transform: rotate(4deg);
-            transform: rotate(4deg);
-  }
-  80% {
-    -webkit-transform: rotate(-2deg);
-            transform: rotate(-2deg);
-  }
-  90% {
-    -webkit-transform: rotate(2deg);
-            transform: rotate(2deg);
-  }
-`;
+// const Error = styled.div`
+//   width: 100%;
+//   display: flex;
+//   flex-direction: row;
+//   align-items: center;
+//   margin: 5px 0px;
+//   &.errorAnimation-enter {
+//     transform: scale(0.4);
+//     opacity: 0;
+//     transition: all 0.1s linear;
+//   }
+//   &.errorAnimation-enter-active {
+//     transform: scale(1);
+//     transition: all 0.1s linear;
+//     opacity: 1;
+//   }
+//   &.errorAnimation-exit {
+//     transform: scale(1);
+//     transition: all 0.1s linear;
+//     opacity: 1;
+//   }
+//   &.errorAnimation-exit-active {
+//     transform: scale(0.4);
+//     opacity: 0;
+//     transition: all 0.1s linear;
+//   }
+// `;
 
 // const Image = styled.div`
 //   height: 22px;
