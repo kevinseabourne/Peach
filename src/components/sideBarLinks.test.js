@@ -7,7 +7,6 @@ import { render, fireEvent } from "@testing-library/react";
 describe("Sidebar Links", () => {
   test.each([
     ["Electronics", "All Electronics", "Electronics"],
-    ["Electronics", "Routers", "Electronics"],
     ["Home", "All Home", "Home"],
     ["Health & Fitness", "All Health & Fitness", "Health & Fitness"]
   ])(
@@ -19,22 +18,21 @@ describe("Sidebar Links", () => {
           <SideBarLinks />
         </Router>
       );
-      // Open
-      const link = getByText(linkName);
 
+      // Open Link Dropdown
+      const link = getByText(linkName);
       fireEvent.click(link);
 
       // Assertion
+      // link dropdown should appear
       expect(getByTestId(`sideBar${linkName}Dropdown`)).toBeVisible();
 
+      // subLinks should appear in dropdown
       const subLink = getByText(subLinkName);
-
-      // expect sublink to appear after clicking on dropdown links
-      fireEvent.click(subLink);
+      expect(subLink).toBeInTheDocument();
 
       // Close
       fireEvent.click(link);
-
       // Assertion
       expect(getByTestId(`sideBar${expected}Dropdown`)).not.toBeVisible();
     }
