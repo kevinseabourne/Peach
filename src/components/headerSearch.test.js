@@ -1,9 +1,14 @@
 import React from "react";
 import HeaderSearch from "./headerSearch";
-import { render, fireEvent, wait } from "@testing-library/react";
+import {
+  render,
+  fireEvent,
+  wait,
+  waitForElementToBeRemoved
+} from "@testing-library/react";
 
 describe("header search component", () => {
-  it("should open & close the HeaderSearch component", () => {
+  it("should open & close the HeaderSearch component", async () => {
     const { getByTestId, getByPlaceholderText } = render(<HeaderSearch />);
     // Open
     const searchIcon = getByTestId("SearchIcon");
@@ -17,7 +22,23 @@ describe("header search component", () => {
     fireEvent.click(exitButton);
 
     // Assertion
-    wait(() => expect(getByTestId("SearchOverlay")).not.toBeInTheDocument());
+    await waitForElementToBeRemoved(() => getByTestId("SearchOverlay"));
+  });
+
+  it("should close the HeaderSearch component when pressing the ESC key", async () => {
+    const { container, getByTestId } = render(<HeaderSearch />);
+    // Open
+    const searchIcon = getByTestId("SearchIcon");
+    fireEvent.click(searchIcon);
+
+    // Assertion
+    expect(getByTestId("SearchOverlay")).toBeInTheDocument();
+
+    // EventListener on Keydown
+    fireEvent.keyDown(container, { key: "Esc", keyCode: 27 });
+
+    // Assertion
+    await waitForElementToBeRemoved(() => getByTestId("SearchOverlay"));
   });
 
   it("should show/hide clear input Button when there is a value or not", () => {
