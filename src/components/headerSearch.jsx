@@ -13,7 +13,18 @@ const HeaderSearch = props => {
     if (toggleSearch) {
       ref.current.focus();
     }
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
   }, [toggleSearch]);
+
+  const handleKeyDown = e => {
+    if (e.keyCode === 27) {
+      setToggleSearch(false);
+    }
+  };
 
   const handleSearchClick = () => {
     setToggleSearch(!toggleSearch);
