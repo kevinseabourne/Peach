@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import styled from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import searchIcon from "../images/search.svg";
 import crossIcon from "../images/cross-icon.svg";
@@ -13,14 +13,14 @@ const HeaderSearch = props => {
     if (toggleSearch) {
       ref.current.focus();
     }
-    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", handleEscKeyDown);
 
     return () => {
-      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keydown", handleEscKeyDown);
     };
   }, [toggleSearch]);
 
-  const handleKeyDown = e => {
+  const handleEscKeyDown = e => {
     if (e.keyCode === 27) {
       setToggleSearch(false);
     }
@@ -43,56 +43,69 @@ const HeaderSearch = props => {
   };
 
   return (
-    <Search>
-      <SearchIcon
-        onClick={handleSearchClick}
-        searchIcon={searchIcon}
-        data-testid="SearchIcon"
-      />
-      <TransitionGroup component={null}>
-        {toggleSearch && (
-          <CSSTransition
-            in={toggleSearch}
-            classNames="searchOverlay"
-            timeout={250}
-          >
-            <SearchOverlay data-testid="SearchOverlay">
-              <ExitButton
-                onClick={handleSearchClick}
-                id="searchExitButton"
-                data-testid="SearchExitButton"
-              >
-                <ExitInner />
-              </ExitButton>
-              <OuterContainer>
-                <SearchBarContainer>
-                  <Input
-                    ref={ref}
-                    type="text"
-                    placeholder="Search..."
-                    value={searchQuery}
-                    onChange={e => handleSearchQuery(e.currentTarget.value)}
-                  />
-                  <IconBox
-                    image={crossIcon}
-                    onClick={clearInputOnClick}
-                    value={searchQuery.length >= 1}
-                    data-testid="searchQueryIconBox"
-                  />
-                </SearchBarContainer>
-                <SearchMessage>
-                  Hit enter to search or ESC to close.
-                </SearchMessage>
-              </OuterContainer>
-            </SearchOverlay>
-          </CSSTransition>
-        )}
-      </TransitionGroup>
-    </Search>
+    <React.Fragment>
+      <GlobalStyle toggleSearch={toggleSearch} />
+      <Search>
+        <SearchIcon
+          onClick={handleSearchClick}
+          searchIcon={searchIcon}
+          data-testid="SearchIcon"
+        />
+        <TransitionGroup component={null}>
+          {toggleSearch && (
+            <CSSTransition
+              in={toggleSearch}
+              classNames="searchOverlay"
+              timeout={250}
+            >
+              <SearchOverlay data-testid="SearchOverlay">
+                <ExitButton
+                  toggleSearch={toggleSearch}
+                  onClick={handleSearchClick}
+                  id="searchExitButton"
+                  data-testid="SearchExitButton"
+                >
+                  <ExitInner />
+                </ExitButton>
+                <OuterContainer>
+                  <SearchBarContainer>
+                    <Input
+                      ref={ref}
+                      type="text"
+                      placeholder="Search..."
+                      value={searchQuery}
+                      onChange={e => handleSearchQuery(e.currentTarget.value)}
+                    />
+                    <IconBox
+                      image={crossIcon}
+                      onClick={clearInputOnClick}
+                      value={searchQuery.length >= 1}
+                      data-testid="searchQueryIconBox"
+                    />
+                  </SearchBarContainer>
+                  <SearchMessage>
+                    Hit enter to search or ESC to close.
+                  </SearchMessage>
+                </OuterContainer>
+              </SearchOverlay>
+            </CSSTransition>
+          )}
+        </TransitionGroup>
+      </Search>
+    </React.Fragment>
   );
 };
 
 export default HeaderSearch;
+
+const GlobalStyle = createGlobalStyle`
+  ${props => !props.toggleSearch} {
+    body {
+      overflow hidden;
+      height: 100%;
+    }
+  }
+`;
 
 const Search = styled.div``;
 

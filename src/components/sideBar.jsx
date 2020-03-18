@@ -1,5 +1,5 @@
 import React from "react";
-import styled from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import peachIcon from "../images/peach.svg";
 import NewsLetter from "./newsletter";
 import SocialNetworkLinks from "./socialNetworkLinks";
@@ -9,6 +9,7 @@ const SideBar = React.forwardRef((props, ref) => {
   const { burgerMenu, handleBurgerClick } = props;
   return (
     <React.Fragment>
+      <GlobalStyle burgerMenu={burgerMenu} />
       <SideBarContainer burgerMenu={burgerMenu} ref={ref} data-testid="sideBar">
         <TopSection>
           <TitleLogoContainer>
@@ -39,6 +40,15 @@ const SideBar = React.forwardRef((props, ref) => {
 
 export default SideBar;
 
+const GlobalStyle = createGlobalStyle`
+  ${props => !props.burgerMenu} {
+    body {
+      overflow hidden;
+      height: 100%;
+    }
+  }
+`;
+
 const SideBarContainer = styled.div`
   height: 100vh;
   width: 350px;
@@ -57,9 +67,6 @@ const SideBarContainer = styled.div`
   ${props => !props.burgerMenu} {
     visibility: visible;
     transform: translateX(0%);
-    body:not(&) {
-      overflow: hidden;
-    }
   }
 `;
 
