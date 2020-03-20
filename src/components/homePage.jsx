@@ -1,10 +1,13 @@
 import React from "react";
 import styled from "styled-components";
+import SliderSection from "./sliderSection";
 
 const HomePage = props => {
   return (
     <Container data-testid="homePage">
-      <Wrapper></Wrapper>
+      <Wrapper>
+        <SliderSection />
+      </Wrapper>
     </Container>
   );
 };
