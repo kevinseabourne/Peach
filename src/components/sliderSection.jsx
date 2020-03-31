@@ -1,8 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import _ from "lodash";
 
 const SliderSection = props => {
+  const ref = useRef(null);
+  const [mouseDownPosition, setMouseDownPosition] = useState(null);
+  const [mouseDown, setMouseDown] = useState(false);
+  const [fadeIn, setFadeIn] = useState(null);
+  const [fadeOut, setFadeOut] = useState(1);
+  const [translateYIn, setTranslateYIn] = useState(19);
+  const [translateYOut, setTranslateYOut] = useState(null);
+  const [dragAnimation, setDragAnimation] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState("");
   const [frontPageArticles, setFrontPageArticles] = useState([
     {
       id: 1,
@@ -12,17 +21,19 @@ const SliderSection = props => {
       date: "May 2nd, 2020",
       selected: true,
       image:
-        "https://chpistel.sirv.com/Peach/webaroo-tN344soypQM-unsplash.jpg?w=1400&h=653&format=jpg"
+        "https://chpistel.sirv.com/Peach/webaroo-tN344soypQM-unsplash.jpg?w=1400&h=653&format=jpg",
+      animationDirection: "left"
     },
     {
       id: 2,
       catergory: "VPNs",
-      title: "Top 5 best VPNs 2020",
+      title: "Top 5 Best VPNs 2020",
       author: "Kevin Seabourne",
       date: "Febuary 9th, 2020",
       selected: false,
       image:
-        "https://chpistel.sirv.com/Peach/petter-lagson-VmMimaq445E-unsplash.jpg?w=1400&h=576&format=jpg"
+        "https://chpistel.sirv.com/Peach/petter-lagson-VmMimaq445E-unsplash.jpg?w=1400&h=576&format=jpg",
+      animationDirection: "right"
     }
   ]);
 
@@ -71,13 +82,148 @@ const SliderSection = props => {
     setFrontPageArticles(updatedFrontpageArticles);
   };
 
+  const handleArticleSwipeChange = swipe => {
+    const frontPageArticlesClone = _.clone(frontPageArticles);
+    let selectedArticleIndex = frontPageArticlesClone.find(
+      article => article.selected === true
+    );
+    // if selected article is the last in the carousel then go to the start
+    // and if selected is first in the carousel go to the next one
+    let index;
+    if (
+      frontPageArticlesClone.length - 1 ===
+      frontPageArticlesClone.indexOf(selectedArticleIndex)
+    ) {
+      index = "reset";
+    } else if (frontPageArticlesClone.indexOf(selectedArticleIndex) === 0) {
+      index = 0;
+    } else {
+      index = frontPageArticlesClone.indexOf(selectedArticleIndex);
+    }
+
+    if (swipe === "right") {
+      const nextIndex = index !== "reset" ? index + 1 : 0;
+      const article = frontPageArticles[nextIndex];
+      handleArticleChange(article);
+    } else {
+      const nextIndex =
+        index !== "reset" ? (index === 0 ? index + 1 : index - 1) : 0;
+      const article = frontPageArticles[nextIndex];
+      handleArticleChange(article);
+    }
+  };
+
+  const handleMouseDown = e => {
+    let position = e.pageX - e.target.offsetLeft;
+    setMouseDownPosition(position);
+    setMouseDown(true);
+  };
+
+  let handleDragging = e => {
+    if (mouseDown) {
+      setDragAnimation(true);
+      if (e.movementX > 0) {
+        setSwipeDirection("right");
+      } else {
+        setSwipeDirection("left");
+      }
+      // dynamically icrement & decrement animation's based on width of containing elment and mouse movement.
+      const mouseDragPosition = e.pageX - e.target.offsetLeft;
+
+      // dragging the mouse 50% left or right of the element will complete the animation.
+      const containerWidth = (50 * e.target.offsetWidth) / 100;
+      const percentage = _.round(
+        100 * ((mouseDragPosition - mouseDownPosition) / containerWidth)
+      );
+
+      if (percentage <= 100 && percentage >= -100) {
+        const oppositePercentage =
+          swipeDirection === "left"
+            ? 100 - Math.abs(percentage)
+            : 100 - percentage;
+        // animations
+        let opacityIn =
+          swipeDirection === "left"
+            ? (Math.abs(percentage) * 1) / 100
+            : (percentage * 1) / 100;
+        let opacityOut =
+          swipeDirection === "left"
+            ? (Math.abs(oppositePercentage) * 1) / 100
+            : (oppositePercentage * 1) / 100;
+        let translateIn =
+          swipeDirection === "left"
+            ? (Math.abs(oppositePercentage) * 19) / 100
+            : (oppositePercentage * 19) / 100;
+        let translateOut =
+          swipeDirection === "left"
+            ? (Math.abs(percentage) * 19) / 100
+            : (percentage * 19) / 100;
+
+        setFadeOut(opacityOut);
+        setFadeIn(opacityIn);
+
+        setTranslateYOut(translateOut);
+        setTranslateYIn(translateIn);
+      }
+    }
+  };
+
+  const handleMouseUp = e => {
+    const containerWidth = (50 * e.target.offsetWidth) / 100;
+    // the article will go to the next article if you have dragged the mouse 25% or more and release the click.
+    let swipeThreshold = (25 * containerWidth) / 100;
+
+    let mouseUpPosition = e.pageX - e.target.offsetLeft;
+    let swipeLength =
+      swipeDirection === "right"
+        ? mouseUpPosition - mouseDownPosition
+        : mouseDownPosition - mouseUpPosition;
+
+    console.log(swipeLength, swipeThreshold);
+    // if we meet the correct length then we go to the next article.
+    if (swipeLength >= swipeThreshold) {
+      if (swipeDirection === "right") {
+        handleArticleSwipeChange("right");
+      } else {
+        handleArticleSwipeChange("left");
+      }
+    }
+    setMouseDown(false);
+    setDragAnimation(false);
+    setFadeIn(null);
+    setFadeOut(1);
+    setTranslateYIn(19);
+    setTranslateYOut(null);
+  };
+
+  const handleMouseOut = () => {
+    setMouseDown(false);
+    setDragAnimation(false);
+    setFadeIn(null);
+    setFadeOut(1);
+    setTranslateYIn(19);
+    setTranslateYOut(null);
+  };
+
   return (
-    <Container>
+    <Container
+      ref={ref}
+      onMouseDown={e => handleMouseDown(e)}
+      onMouseMove={e => mouseDown && handleDragging(e)}
+      onMouseUp={e => handleMouseUp(e)}
+      onMouseLeave={e => handleMouseOut()}
+      data-testid="carousel-container"
+    >
       {frontPageArticles.map(article => (
         <BackgroundImage
           key={article.id}
           image={article.image}
           articleSelected={article.selected}
+          animationDirection={article.animationDirection}
+          dragAnimation={mouseDown}
+          fadeIn={fadeIn}
+          fadeOut={fadeOut}
+          data-testid={`${article.title} background-image`}
         />
       ))}
       <LeftContent>
@@ -90,6 +236,7 @@ const SliderSection = props => {
                   index={frontPageArticles.indexOf(fpArticle) + 1}
                   articleSelected={fpArticle.selected}
                   animationDirection={fpArticle.animationDirection}
+                  data-testid={`${fpArticle.title} article-number`}
                 >
                   {frontPageArticles.indexOf(fpArticle) + 1}
                 </ArticleNumber>
@@ -105,9 +252,17 @@ const SliderSection = props => {
               image={fpArticle.image}
               articleSelected={fpArticle.selected}
               key={fpArticle.id}
+              dragAnimation={dragAnimation}
+              fadeIn={fadeIn}
+              fadeOut={fadeOut}
+              translateYOut={translateYOut}
+              translateYIn={translateYIn}
+              data-testid={`${fpArticle.title} Container`}
             >
               <Catergory>{fpArticle.catergory}</Catergory>
-              <Title>{fpArticle.title}</Title>
+              <Title data-testid={`${fpArticle.id}title`}>
+                {fpArticle.title}
+              </Title>
               <AuthorDateContainer>
                 <Author>By {fpArticle.author}</Author>
                 <ArticleDate>{fpArticle.date}</ArticleDate>
@@ -119,6 +274,7 @@ const SliderSection = props => {
           {frontPageArticles.map(fpArticle => (
             <SwiperPagination
               key={fpArticle.id}
+              data-testid={`${fpArticle.title}pagination-dot`}
               articleSelected={fpArticle.selected}
               onClick={() => handleArticleChange(fpArticle)}
             />
@@ -151,33 +307,41 @@ const Container = styled.div`
   align-items: center;
   justify-content: space-between;
   position: relative;
+  overflow: hidden;
 `;
 
-const BackgroundImage = styled.div`
+const BackgroundImage = styled.div.attrs(props => ({
+  style: {
+    opacity: props.articleSelected
+      ? !props.dragAnimation
+        ? 1
+        : props.fadeOut
+      : !props.dragAnimation
+      ? 0
+      : props.fadeIn
+  }
+}))`
   position: absolute;
   width: 100%;
   height: 100%;
   top: 0;
-  left: 0;
-  transition: all 0.5s;
+  transition: all 0.7s;
   background: url(${props => props.image});
   background-position: center;
   z-index: -999;
-  background-size: cover;
+  background-size: 100%;
   background-repeat: no-repeat;
   ${props => props.articleSelected} {
-    transition: all 0.5s ease;
     opacity: 0;
   }
   ${props => !props.articleSelected} {
-    transition: all 0.5s ease;
-    transition-delay: 0.1s;
     opacity: 1;
   }
 `;
 
 const LeftContent = styled.div`
   height: 540px;
+  margin-left: 50px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -190,7 +354,7 @@ const Featured = styled.div`
 `;
 
 const FeaturedBox = styled.div`
-  transition: 0.5s;
+  transition: 0.3s;
   background-color: var(--color-accent);
   color: var(--color-white);
   width: 40px;
@@ -201,38 +365,40 @@ const FeaturedBox = styled.div`
   overflow: hidden;
   position: relative;
   ${props => props.articleSelected} {
-    transition: all 0.5s;
+    transition: all 0.3s;
     opacity: 1;
   }
   ${props => !props.articleSelected} {
-    transition: all 0.5s;
-    transition-delay: 0.5s;
+    transition: all 0.3s;
+    transition-delay: 0.3s;
     opacity: 0;
   }
 `;
 
 const ArticleNumber = styled.label`
-  transition: 0.5s ease;
+  transition: 0.3s;
   color: var(--color-white);
   font-size: 16px;
   overflow: hidden;
-  transform: translateX(0px);
   position: absolute;
+  transform: translateX(0px);
   ${props => props.articleSelected} {
-    transition: 0.5s ease;
+    transition: 0.3s;
     opacity: 0;
+    visibility: hidden;
     ${props => props.animationDirection === "left"} {
-      transform: translateX(-21px);
+      transform: translateX(21px);
     }
     ${props => props.animationDirection === "right"} {
-      transform: translateX(21px);
+      transform: translateX(-21px);
     }
   }
   ${props => !props.articleSelected} {
-    transition: 0.5s ease;
-    transition-delay: 0.5s;
+    transition: 0.3s;
+    transition-delay: 0.3s;
     opacity: 1;
-    transform: scale(1) translateX(0px);
+    visibility: visible;
+    transform: translateX(0px);
   }
 `;
 
@@ -251,28 +417,43 @@ const FeaturedTitle = styled.div`
   }
 `;
 
-const ArticleInformation = styled.div`
+const ArticleInformation = styled.div.attrs(props => ({
+  style: {
+    transitionDelay: !props.articleSelected
+      ? !props.dragAnimation
+        ? `0s`
+        : `0.3s`
+      : !props.dragAnimation
+      ? `0.3s`
+      : `0s`,
+    opacity: props.articleSelected
+      ? !props.dragAnimation
+        ? 1
+        : props.fadeOut
+      : !props.dragAnimation
+      ? 0
+      : props.fadeIn,
+    transform: props.articleSelected
+      ? !props.dragAnimation
+        ? `translateY(0px)`
+        : `translateY(${props.translateYOut}px)`
+      : !props.dragAnimation
+      ? `translateY(${props.translateYIn}px)`
+      : `translateY(${props.translateYIn}px)`
+  }
+}))`
   color: var(--color-white);
   position: absolute;
+  margin-left: 50px;
   bottom: 130px;
   left: 0;
-  transition: all 0.5s;
- ${props => props.articleSelected} {
-    transition: all 0.5s;
-    opacity: 0;
-    transform: translateY(50px);
-  }
- ${props => !props.articleSelected} {
-    transition: all 0.5s;
-    transition-delay: 0.5s;
-    opacity: 1;
-    transform: translateY(0px);
-  }
-}
+  transition: all 0.3s;
 `;
 
 const Catergory = styled.span`
   font-size: var(--font-size-xs);
+  letter-spacing: 0.2px;
+  color: var(--color-white);
 `;
 
 const Title = styled.h2``;
@@ -280,13 +461,14 @@ const Title = styled.h2``;
 const AuthorDateContainer = styled.div``;
 
 const Author = styled.label`
+  color: rgba(255, 255, 255, 0.7);
   &::after {
     content: "";
     margin: 0rem 0.5rem;
     vertical-align: middle;
     display: inline-flex;
     align-self: center;
-    background-color: currentColor;
+    background-color: rgba(255, 255, 255, 0.7);
     height: 0.25rem;
     width: 0.25rem;
     border-radius: 9999px;
@@ -296,6 +478,7 @@ const Author = styled.label`
 
 const ArticleDate = styled.label`
   color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
 `;
 
 const SwiperPaginationContainer = styled.div`
@@ -309,7 +492,7 @@ const SwiperPagination = styled.div`
   height: 10px;
   border-radius: 100%;
   margin: 0px 4px;
-  background-color: rgba(255, 255, 255, 0.7);
+  background-color: var(--dark-border-color-strong);
   transition-duration: 500ms;
   &:first-child {
     margin: 0px;
@@ -318,7 +501,7 @@ const SwiperPagination = styled.div`
     cursor: pointer;
   }
   ${props => !props.articleSelected} {
-    background-color: black;
+    background-color: white;
     ${ArticleInformation} {
       opacity: 1;
     }
