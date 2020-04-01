@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+//  ingoring the test file in coverage, as i have coverage with Cypress testing framework.
 import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import _ from "lodash";
@@ -113,73 +115,17 @@ const SliderSection = props => {
     }
   };
 
-  const handleMouseDown = e => {
-    let position = e.pageX - e.target.offsetLeft;
-    setMouseDownPosition(position);
-    setMouseDown(true);
-  };
-
-  let handleDragging = e => {
-    if (mouseDown) {
-      setDragAnimation(true);
-      if (e.movementX > 0) {
-        setSwipeDirection("right");
-      } else {
-        setSwipeDirection("left");
-      }
-      // dynamically icrement & decrement animation's based on width of containing elment and mouse movement.
-      const mouseDragPosition = e.pageX - e.target.offsetLeft;
-
-      // dragging the mouse 50% left or right of the element will complete the animation.
-      const containerWidth = (50 * e.target.offsetWidth) / 100;
-      const percentage = _.round(
-        100 * ((mouseDragPosition - mouseDownPosition) / containerWidth)
-      );
-
-      if (percentage <= 100 && percentage >= -100) {
-        const oppositePercentage =
-          swipeDirection === "left"
-            ? 100 - Math.abs(percentage)
-            : 100 - percentage;
-        // animations
-        let opacityIn =
-          swipeDirection === "left"
-            ? (Math.abs(percentage) * 1) / 100
-            : (percentage * 1) / 100;
-        let opacityOut =
-          swipeDirection === "left"
-            ? (Math.abs(oppositePercentage) * 1) / 100
-            : (oppositePercentage * 1) / 100;
-        let translateIn =
-          swipeDirection === "left"
-            ? (Math.abs(oppositePercentage) * 19) / 100
-            : (oppositePercentage * 19) / 100;
-        let translateOut =
-          swipeDirection === "left"
-            ? (Math.abs(percentage) * 19) / 100
-            : (percentage * 19) / 100;
-
-        setFadeOut(opacityOut);
-        setFadeIn(opacityIn);
-
-        setTranslateYOut(translateOut);
-        setTranslateYIn(translateIn);
-      }
-    }
-  };
-
-  const handleMouseUp = e => {
-    const containerWidth = (50 * e.target.offsetWidth) / 100;
+  const handleSwipeLengthThreshold = e => {
+    const containerWidth = (50 * ref.current.offsetWidth) / 100;
     // the article will go to the next article if you have dragged the mouse 25% or more and release the click.
     let swipeThreshold = (25 * containerWidth) / 100;
 
-    let mouseUpPosition = e.pageX - e.target.offsetLeft;
+    let mouseUpPosition = e.pageX - ref.current.offsetLeft;
     let swipeLength =
       swipeDirection === "right"
         ? mouseUpPosition - mouseDownPosition
         : mouseDownPosition - mouseUpPosition;
 
-    console.log(swipeLength, swipeThreshold);
     // if we meet the correct length then we go to the next article.
     if (swipeLength >= swipeThreshold) {
       if (swipeDirection === "right") {
@@ -188,6 +134,61 @@ const SliderSection = props => {
         handleArticleSwipeChange("left");
       }
     }
+  };
+
+  const handleMouseDown = e => {
+    let position = e.pageX - ref.current.offsetLeft;
+    setMouseDownPosition(position);
+    setMouseDown(true);
+  };
+
+  let handleDragging = e => {
+    setDragAnimation(true);
+    // swipe direction
+    e.movementX > 0 ? setSwipeDirection("right") : setSwipeDirection("left");
+
+    // used ref.current.offsetLeft & ref.current.offsetWidth instead of e.target.offsetLeft & e.target.offsetWidth due e.target changing when hovering over children in container.
+    const mouseDragPosition = e.pageX - ref.current.offsetLeft;
+
+    // dragging the mouse 50% left or right of the element will complete the animation.
+    const containerWidth = (50 * ref.current.offsetWidth) / 100;
+    const percentage = _.round(
+      100 * ((mouseDragPosition - mouseDownPosition) / containerWidth)
+    );
+
+    if (percentage <= 100 && percentage >= -100) {
+      const oppositePercentage =
+        swipeDirection === "left"
+          ? 100 - Math.abs(percentage)
+          : 100 - percentage;
+
+      // dynamic animations based on mouse position
+      let opacityIn =
+        swipeDirection === "left"
+          ? (Math.abs(percentage) * 1) / 100
+          : (percentage * 1) / 100;
+      let opacityOut =
+        swipeDirection === "left"
+          ? (Math.abs(oppositePercentage) * 1) / 100
+          : (oppositePercentage * 1) / 100;
+      let translateIn =
+        swipeDirection === "left"
+          ? (Math.abs(oppositePercentage) * 19) / 100
+          : (oppositePercentage * 19) / 100;
+      let translateOut =
+        swipeDirection === "left"
+          ? (Math.abs(percentage) * 19) / 100
+          : (percentage * 19) / 100;
+
+      setFadeOut(opacityOut);
+      setFadeIn(opacityIn);
+      setTranslateYOut(translateOut);
+      setTranslateYIn(translateIn);
+    }
+  };
+
+  const handleMouseUp = e => {
+    handleSwipeLengthThreshold(e);
     setMouseDown(false);
     setDragAnimation(false);
     setFadeIn(null);
@@ -196,7 +197,8 @@ const SliderSection = props => {
     setTranslateYOut(null);
   };
 
-  const handleMouseOut = () => {
+  const handleMouseOut = e => {
+    handleSwipeLengthThreshold(e);
     setMouseDown(false);
     setDragAnimation(false);
     setFadeIn(null);
@@ -211,7 +213,7 @@ const SliderSection = props => {
       onMouseDown={e => handleMouseDown(e)}
       onMouseMove={e => mouseDown && handleDragging(e)}
       onMouseUp={e => handleMouseUp(e)}
-      onMouseLeave={e => handleMouseOut()}
+      onMouseLeave={e => mouseDown && handleMouseOut(e)}
       data-testid="carousel-container"
     >
       {frontPageArticles.map(article => (
@@ -404,6 +406,9 @@ const ArticleNumber = styled.label`
 
 const FeaturedTitle = styled.div`
   color: var(--color-white);
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
   &::before {
     content: "";
     margin: 0rem 0.5rem;
@@ -414,6 +419,9 @@ const FeaturedTitle = styled.div`
     height: 0.15rem;
     width: 1rem;
     opacity: 0.5;
+  }
+  &:hover {
+    cursor: default;
   }
 `;
 
@@ -448,6 +456,9 @@ const ArticleInformation = styled.div.attrs(props => ({
   bottom: 130px;
   left: 0;
   transition: all 0.3s;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 `;
 
 const Catergory = styled.span`
@@ -516,6 +527,9 @@ const RightContent = styled.div`
   flex-direction: column;
   padding: 32px;
   margin-right: 50px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 `;
 
 const SideBarTitle = styled.label`
