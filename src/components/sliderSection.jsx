@@ -1,7 +1,6 @@
-/* istanbul ignore file */
-//  ingoring the test file in coverage, as i have coverage with Cypress testing framework.
 import React, { useState, useRef } from "react";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
+import LazyLoad from "react-lazyload";
 import _ from "lodash";
 
 const SliderSection = props => {
@@ -14,30 +13,6 @@ const SliderSection = props => {
   const [translateYOut, setTranslateYOut] = useState(null);
   const [dragAnimation, setDragAnimation] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState("");
-  const [frontPageArticles, setFrontPageArticles] = useState([
-    {
-      id: 1,
-      catergory: "Routers",
-      title: "Top 5 Best Routers 2020",
-      author: "Kevin Seabourne",
-      date: "May 2nd, 2020",
-      selected: true,
-      image:
-        "https://chpistel.sirv.com/Peach/webaroo-tN344soypQM-unsplash.jpg?w=1400&h=653&format=jpg",
-      animationDirection: "left"
-    },
-    {
-      id: 2,
-      catergory: "VPNs",
-      title: "Top 5 Best VPNs 2020",
-      author: "Kevin Seabourne",
-      date: "Febuary 9th, 2020",
-      selected: false,
-      image:
-        "https://chpistel.sirv.com/Peach/petter-lagson-VmMimaq445E-unsplash.jpg?w=1400&h=576&format=jpg",
-      animationDirection: "right"
-    }
-  ]);
 
   const [articles] = useState([
     {
@@ -58,60 +33,35 @@ const SliderSection = props => {
     }
   ]);
 
-  const handleArticleChange = SelectedArticle => {
-    const frontPageArticlesClone = _.clone(frontPageArticles);
-    const currentArticleIndex = frontPageArticlesClone.findIndex(
-      article => article.selected
-    );
-    const selectedArticleIndex = frontPageArticlesClone.indexOf(
-      SelectedArticle
-    );
-
-    const updatedFrontpageArticles = frontPageArticlesClone.map(article => {
-      if (SelectedArticle.id === article.id) {
-        article.selected = true;
-        if (selectedArticleIndex > currentArticleIndex) {
-          article.animationDirection = "right";
-        } else {
-          article.animationDirection = "left";
-        }
-        return article;
-      } else {
-        article.selected = false;
-        return article;
-      }
-    });
-    setFrontPageArticles(updatedFrontpageArticles);
-  };
-
   const handleArticleSwipeChange = swipe => {
-    const frontPageArticlesClone = _.clone(frontPageArticles);
-    let selectedArticleIndex = frontPageArticlesClone.find(
+    const { featuredArticles, handleFeaturedArticleChange } = props;
+    const featuredArticlesClone = _.clone(featuredArticles);
+    let selectedArticleIndex = featuredArticlesClone.find(
       article => article.selected === true
     );
     // if selected article is the last in the carousel then go to the start
     // and if selected is first in the carousel go to the next one
     let index;
     if (
-      frontPageArticlesClone.length - 1 ===
-      frontPageArticlesClone.indexOf(selectedArticleIndex)
+      featuredArticlesClone.length - 1 ===
+      featuredArticlesClone.indexOf(selectedArticleIndex)
     ) {
       index = "reset";
-    } else if (frontPageArticlesClone.indexOf(selectedArticleIndex) === 0) {
+    } else if (featuredArticlesClone.indexOf(selectedArticleIndex) === 0) {
       index = 0;
     } else {
-      index = frontPageArticlesClone.indexOf(selectedArticleIndex);
+      index = featuredArticlesClone.indexOf(selectedArticleIndex);
     }
 
     if (swipe === "right") {
       const nextIndex = index !== "reset" ? index + 1 : 0;
-      const article = frontPageArticles[nextIndex];
-      handleArticleChange(article);
+      const article = featuredArticles[nextIndex];
+      handleFeaturedArticleChange(article);
     } else {
       const nextIndex =
         index !== "reset" ? (index === 0 ? index + 1 : index - 1) : 0;
-      const article = frontPageArticles[nextIndex];
-      handleArticleChange(article);
+      const article = featuredArticles[nextIndex];
+      handleFeaturedArticleChange(article);
     }
   };
 
@@ -207,6 +157,8 @@ const SliderSection = props => {
     setTranslateYOut(null);
   };
 
+  const { featuredArticles, handleFeaturedArticleChange, onImageLoad } = props;
+
   return (
     <Container
       ref={ref}
@@ -216,31 +168,39 @@ const SliderSection = props => {
       onMouseLeave={e => mouseDown && handleMouseOut(e)}
       data-testid="carousel-container"
     >
-      {frontPageArticles.map(article => (
-        <BackgroundImage
-          key={article.id}
-          image={article.image}
-          articleSelected={article.selected}
-          animationDirection={article.animationDirection}
-          dragAnimation={mouseDown}
-          fadeIn={fadeIn}
-          fadeOut={fadeOut}
-          data-testid={`${article.title} background-image`}
-        />
+      {featuredArticles.map(article => (
+        <LazyLoad key={article.id} once={true} height={653} offset={100}>
+          <BackgroundImage
+            key={article.id}
+            image={article.image[1]}
+            loadImage={`${article.image[0]}&w=42`}
+            imageLoaded={article.imageLoaded}
+            articleSelected={article.selected}
+            animationDirection={article.animationDirection}
+            dragAnimation={mouseDown}
+            fadeIn={fadeIn}
+            fadeOut={fadeOut}
+            data-testid={`${article.title} background-image`}
+          />
+          <ImageLoader
+            src={article.image[1]}
+            onLoad={() => onImageLoad(article, featuredArticles)}
+          />
+        </LazyLoad>
       ))}
       <LeftContent>
         <Featured>
           <FeaturedBox>
-            {frontPageArticles.map(fpArticle => {
+            {featuredArticles.map(fpArticle => {
               return (
                 <ArticleNumber
                   key={fpArticle.id}
-                  index={frontPageArticles.indexOf(fpArticle) + 1}
+                  index={featuredArticles.indexOf(fpArticle) + 1}
                   articleSelected={fpArticle.selected}
                   animationDirection={fpArticle.animationDirection}
                   data-testid={`${fpArticle.title} article-number`}
                 >
-                  {frontPageArticles.indexOf(fpArticle) + 1}
+                  {featuredArticles.indexOf(fpArticle) + 1}
                 </ArticleNumber>
               );
             })}
@@ -248,10 +208,10 @@ const SliderSection = props => {
 
           <FeaturedTitle>Featured</FeaturedTitle>
         </Featured>
-        {frontPageArticles.map(fpArticle => {
+        {featuredArticles.map(fpArticle => {
           return (
             <ArticleInformation
-              image={fpArticle.image}
+              image={fpArticle.image[1]}
               articleSelected={fpArticle.selected}
               key={fpArticle.id}
               dragAnimation={dragAnimation}
@@ -267,18 +227,20 @@ const SliderSection = props => {
               </Title>
               <AuthorDateContainer>
                 <Author>By {fpArticle.author}</Author>
-                <ArticleDate>{fpArticle.date}</ArticleDate>
+                <ArticleDate>
+                  {new Date().toDateString(fpArticle.datePublished)}
+                </ArticleDate>
               </AuthorDateContainer>
             </ArticleInformation>
           );
         })}
         <SwiperPaginationContainer>
-          {frontPageArticles.map(fpArticle => (
+          {featuredArticles.map(fpArticle => (
             <SwiperPagination
               key={fpArticle.id}
               data-testid={`${fpArticle.title}pagination-dot`}
               articleSelected={fpArticle.selected}
-              onClick={() => handleArticleChange(fpArticle)}
+              onClick={() => handleFeaturedArticleChange(fpArticle)}
             />
           ))}
         </SwiperPaginationContainer>
@@ -310,7 +272,29 @@ const Container = styled.div`
   justify-content: space-between;
   position: relative;
   overflow: hidden;
+  @media (max-width: 935px) {
+    height: 100vh;
+  }
 `;
+
+// const keyframesShimmer = keyframes`
+// 0% {
+//    transform: translateX(-100%);
+//  }
+//  100% {
+//    transform: translateX(100%);
+//  }
+// `;
+
+// const PlaceHolder = styled.img`
+//   position: absolute;
+//   width: 100%;
+//   height: 100%;
+//   top: 0;
+//   background: linear-gradient(to right, #ddd 4%, #e8e8e8 25%, #ddd 36%);
+//   z-index: -9999;
+//   animation: ${keyframesShimmer} 1.5s infinite ease-in-out;
+// `;
 
 const BackgroundImage = styled.div.attrs(props => ({
   style: {
@@ -327,18 +311,33 @@ const BackgroundImage = styled.div.attrs(props => ({
   width: 100%;
   height: 100%;
   top: 0;
-  transition: all 0.7s;
-  background: url(${props => props.image});
+  transition: all 1.9s linear;
+  background: url(${props => props.loadImage}), url(${props => props.image});
+  filter: blur(8px);
   background-position: center;
   z-index: -999;
-  background-size: 100%;
+  background-size: cover;
   background-repeat: no-repeat;
   ${props => props.articleSelected} {
     opacity: 0;
+    transition: all 0.7s;
   }
   ${props => !props.articleSelected} {
     opacity: 1;
+    transition: all 0.7s;
   }
+  ${props => !props.imageLoaded} {
+    filter: blur(0px);
+    background: url(${props => props.image});
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    animation: none;
+  }
+`;
+
+const ImageLoader = styled.img`
+  display: none;
 `;
 
 const LeftContent = styled.div`
@@ -347,6 +346,9 @@ const LeftContent = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  @media (max-width: 935px) {
+    height: 80vh;
+  }
 `;
 
 const Featured = styled.div`
@@ -459,6 +461,9 @@ const ArticleInformation = styled.div.attrs(props => ({
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  @media (max-width: 935px) {
+    bottom: 220px;
+  }
 `;
 
 const Catergory = styled.span`
@@ -530,6 +535,9 @@ const RightContent = styled.div`
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  @media (max-width: 935px) {
+    display: none;
+  }
 `;
 
 const SideBarTitle = styled.label`
