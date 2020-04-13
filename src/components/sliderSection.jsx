@@ -1,7 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled, { keyframes } from "styled-components";
 import LazyLoad from "react-lazyload";
 import _ from "lodash";
+import { getAllArticles } from "../components/services/articleService";
+import ReusableContentLoader from "./common/ReusableContentLoader";
 
 const SliderSection = props => {
   const ref = useRef(null);
@@ -13,28 +15,80 @@ const SliderSection = props => {
   const [translateYOut, setTranslateYOut] = useState(null);
   const [dragAnimation, setDragAnimation] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState("");
+  const [allArticles, setAllArticles] = useState([]);
+  const [featuredArticles, setFeaturedArticles] = useState([]);
+  const timer = useRef(null);
 
-  const [articles] = useState([
-    {
-      title: "Few Facts About Streaming and Music Creation",
-      date: "April 29th, 2020"
-    },
-    {
-      title: "The Real Reason Why Money Can’t Buy You Freedom",
-      date: "May 27th, 2020"
-    },
-    {
-      title: "Hacking a Cheap $99 Camera to Do More Than It’s Worth",
-      date: "May 3, 2020"
-    },
-    {
-      title: "10 Eating Habits That Rewire Your Brain for Success",
-      date: "May 25, 2020"
+  useEffect(() => {
+    async function fetchData() {
+      const { data } = await getAllArticles();
+
+      setAllArticles(data);
+      handleFeaturedArticles(data);
     }
-  ]);
+    fetchData();
+    return () => {
+      timer.current && clearTimeout(timer.current);
+    };
+  }, []);
+
+  const handleFeaturedArticles = articles => {
+    // In the admin page, give the ability to set which articles are featured articles max 4 articles.
+    const featuredArticles = articles.filter(
+      article => article.featuredArticle
+    );
+    // giving each article an animation direction
+    featuredArticles.map(article => {
+      if (featuredArticles.indexOf(article) === 0) {
+        article.animationDirection = "left";
+        article.selected = true;
+        return article;
+      } else {
+        article.animationDirection = "right";
+        article.selected = false;
+        return article;
+      }
+    });
+    setFeaturedArticles(featuredArticles);
+  };
+
+  const handleFeaturedArticleChange = SelectedArticle => {
+    const featuredArticlesClone = _.clone(featuredArticles);
+    const currentArticleIndex = featuredArticlesClone.findIndex(
+      article => article.selected
+    );
+    const selectedArticleIndex = featuredArticlesClone.indexOf(SelectedArticle);
+
+    const updatedFeaturedArticles = featuredArticlesClone.map(article => {
+      if (SelectedArticle.id === article.id) {
+        article.selected = true;
+        if (selectedArticleIndex > currentArticleIndex) {
+          article.animationDirection = "right";
+        } else {
+          article.animationDirection = "left";
+        }
+        return article;
+      } else {
+        article.selected = false;
+        return article;
+      }
+    });
+    setFeaturedArticles(updatedFeaturedArticles);
+  };
+
+  const onImageLoad = () => {
+    const featuredArticlesClone = _.clone(featuredArticles);
+
+    timer.current = setTimeout(() => {
+      const updatedFeaturedArticles = featuredArticlesClone.map(article => {
+        article.imageLoaded = true;
+        return article;
+      });
+      setFeaturedArticles(updatedFeaturedArticles);
+    }, 2800);
+  };
 
   const handleArticleSwipeChange = swipe => {
-    const { featuredArticles, handleFeaturedArticleChange } = props;
     const featuredArticlesClone = _.clone(featuredArticles);
     let selectedArticleIndex = featuredArticlesClone.find(
       article => article.selected === true
@@ -157,8 +211,6 @@ const SliderSection = props => {
     setTranslateYOut(null);
   };
 
-  const { featuredArticles, handleFeaturedArticleChange, onImageLoad } = props;
-
   return (
     <Container
       ref={ref}
@@ -169,94 +221,190 @@ const SliderSection = props => {
       data-testid="carousel-container"
     >
       {featuredArticles.map(article => (
-        <LazyLoad key={article.id} once={true} height={653} offset={100}>
-          <BackgroundImage
-            key={article.id}
-            image={article.image[1]}
-            loadImage={`${article.image[0]}&w=42`}
-            imageLoaded={article.imageLoaded}
-            articleSelected={article.selected}
-            animationDirection={article.animationDirection}
-            dragAnimation={mouseDown}
-            fadeIn={fadeIn}
-            fadeOut={fadeOut}
-            data-testid={`${article.title} background-image`}
-          />
-          <ImageLoader
-            src={article.image[1]}
-            onLoad={() => onImageLoad(article, featuredArticles)}
-          />
-        </LazyLoad>
-      ))}
-      <LeftContent>
-        <Featured>
-          <FeaturedBox>
-            {featuredArticles.map(fpArticle => {
-              return (
+        <InnerContainer key={article.id}>
+          <LazyLoad key={article.id} once={true} height={653} offset={100}>
+            <BackgroundImage
+              key={article.id}
+              image={article.image[1]}
+              loadImage={`${article.image[0]}&w=1302`}
+              imageLoaded={article.imageLoaded}
+              articleSelected={article.selected}
+              animationDirection={article.animationDirection}
+              dragAnimation={mouseDown}
+              fadeIn={fadeIn}
+              fadeOut={fadeOut}
+              data-testid={`${article.title} background-image`}
+            >
+              <PlaceHolder imageLoaded={article.imageLoaded}>
+                <Internal />
+              </PlaceHolder>
+            </BackgroundImage>
+            <ImageLoader
+              src={article.image[1]}
+              onLoad={() => onImageLoad(article, featuredArticles)}
+            />
+          </LazyLoad>
+          <LeftContent>
+            <Featured>
+              <FeaturedBox imageLoaded={article.imageLoaded}>
                 <ArticleNumber
-                  key={fpArticle.id}
-                  index={featuredArticles.indexOf(fpArticle) + 1}
-                  articleSelected={fpArticle.selected}
-                  animationDirection={fpArticle.animationDirection}
-                  data-testid={`${fpArticle.title} article-number`}
+                  key={article.id}
+                  index={featuredArticles.indexOf(article) + 1}
+                  articleSelected={article.selected}
+                  animationDirection={article.animationDirection}
+                  data-testid={`${article.title} article-number`}
+                  imageLoaded={article.imageLoaded}
                 >
-                  {featuredArticles.indexOf(fpArticle) + 1}
+                  {article.imageLoaded && featuredArticles.indexOf(article) + 1}
                 </ArticleNumber>
-              );
-            })}
-          </FeaturedBox>
+              </FeaturedBox>
 
-          <FeaturedTitle>Featured</FeaturedTitle>
-        </Featured>
-        {featuredArticles.map(fpArticle => {
-          return (
+              <Line />
+              <ReusableContentLoader
+                // Featured Title
+                information={"Featured"}
+                width={"14px"}
+                contentLoaded={article.imageLoaded}
+                font={"inherit"}
+                fontSize={`inherit`}
+                margin={"6px 0px 6px 0px"}
+                color={"var(--color-white)"}
+                backgroundColor={"rgba(232, 232, 232, 1)"}
+                transparentColor={"rgba(232, 232, 232, 0)"}
+                linearGradient={`linear-gradient(to right, #e8e8e8 4%, #ddd 18%, #e8e8e8 36%)`}
+              />
+            </Featured>
             <ArticleInformation
-              image={fpArticle.image[1]}
-              articleSelected={fpArticle.selected}
-              key={fpArticle.id}
+              image={article.image[1]}
+              articleSelected={article.selected}
+              key={article.id}
               dragAnimation={dragAnimation}
               fadeIn={fadeIn}
               fadeOut={fadeOut}
               translateYOut={translateYOut}
               translateYIn={translateYIn}
-              data-testid={`${fpArticle.title} Container`}
+              data-testid={`${article.title} Container`}
             >
-              <Catergory>{fpArticle.catergory}</Catergory>
-              <Title data-testid={`${fpArticle.id}title`}>
-                {fpArticle.title}
-              </Title>
+              <ReusableContentLoader
+                // Category
+                information={article.category}
+                width={"14px"}
+                contentLoaded={article.imageLoaded}
+                font={"var(--font-size-xs)"}
+                fontSize={`var(--font-size-xs)`}
+                letterSpacing={"0.2px"}
+                margin={"0px 0px 6px 0px"}
+                color={"var(--color-white)"}
+                backgroundColor={"rgba(232, 232, 232, 1)"}
+                transparentColor={"rgba(232, 232, 232, 0)"}
+                linearGradient={`linear-gradient(to right, #e8e8e8 4%, #ddd 18%, #e8e8e8 36%)`}
+              />
+              <ReusableContentLoader
+                // Title
+                information={article.title}
+                width={"28px"}
+                contentLoaded={article.imageLoaded}
+                font={"inherit"}
+                fontSize={"24px"}
+                margin={"8px 0px 15px 0px"}
+                color={"var(--color-white)"}
+                backgroundColor={"rgba(232, 232, 232, 1)"}
+                transparentColor={"rgba(232, 232, 232, 0)"}
+                linearGradient={`linear-gradient(to right, #e8e8e8 4%, #ddd 18%, #e8e8e8 36%)`}
+              />
               <AuthorDateContainer>
-                <Author>By {fpArticle.author}</Author>
-                <ArticleDate>
-                  {new Date().toDateString(fpArticle.datePublished)}
-                </ArticleDate>
+                <ReusableContentLoader
+                  // Author
+                  information={`By ${article.author}`}
+                  contentLoaded={article.imageLoaded}
+                  font={"inherit"}
+                  fontSize={"inherit"}
+                  margin={"0px 0px"}
+                  color={"var(--color-white)"}
+                  backgroundColor={"rgba(232, 232, 232, 1)"}
+                  transparentColor={"rgba(232, 232, 232, 0)"}
+                  linearGradient={`linear-gradient(to right, #e8e8e8 4%, #ddd 18%, #e8e8e8 36%)`}
+                />
+                <Dot />
+                <ReusableContentLoader
+                  // Published / Updated Article Date
+                  information={`By ${new Date().toDateString(
+                    article.datePublished
+                  )}`}
+                  contentLoaded={article.imageLoaded}
+                  font={"inherit"}
+                  fontSize={"inherit"}
+                  margin={"0rem 0rem"}
+                  color={"var(--color-white)"}
+                  backgroundColor={"rgba(232, 232, 232, 1)"}
+                  transparentColor={"rgba(232, 232, 232, 0)"}
+                  linearGradient={`linear-gradient(to right, #e8e8e8 4%, #ddd 18%, #e8e8e8 36%)`}
+                />
               </AuthorDateContainer>
             </ArticleInformation>
-          );
-        })}
-        <SwiperPaginationContainer>
-          {featuredArticles.map(fpArticle => (
-            <SwiperPagination
-              key={fpArticle.id}
-              data-testid={`${fpArticle.title}pagination-dot`}
-              articleSelected={fpArticle.selected}
-              onClick={() => handleFeaturedArticleChange(fpArticle)}
-            />
-          ))}
-        </SwiperPaginationContainer>
-      </LeftContent>
-      <RightContent>
-        <SideBarTitle>What's Hot</SideBarTitle>
-        {articles.map(article => (
-          <SideBarArticleContainer key={articles.indexOf(article)}>
-            <SideBarArticleImage />
-            <SideBarArticleInfoContainer>
-              <SideBarArticleTitle>{article.title}</SideBarArticleTitle>
-              <ArticleDate>{article.date}</ArticleDate>
-            </SideBarArticleInfoContainer>
-          </SideBarArticleContainer>
-        ))}
-      </RightContent>
+            <SwiperPaginationContainer>
+              {featuredArticles.map(fpArticle => (
+                <SwiperPagination
+                  key={fpArticle.id}
+                  data-testid={`${fpArticle.title}pagination-dot`}
+                  articleSelected={fpArticle.selected}
+                  onClick={() => handleFeaturedArticleChange(fpArticle)}
+                />
+              ))}
+            </SwiperPaginationContainer>
+          </LeftContent>
+          <RightContent imageLoaded={article.imageLoaded}>
+            <SidebarTitleContainer>
+              <ReusableContentLoader
+                // Sidebar Title
+                information={"What's Hot"}
+                contentLoaded={article.imageLoaded}
+                font={"inherit"}
+                fontSize={`var(--font-size-xl)`}
+                margin={"0px auto 24px 0px"}
+                color={"var(--color-white)"}
+                backgroundColor={"rgba(232, 232, 232, 1)"}
+                transparentColor={"rgba(232, 232, 232, 0)"}
+                linearGradient={`linear-gradient(to right, #e8e8e8 4%, #ddd 18%, #e8e8e8 36%)`}
+              />
+            </SidebarTitleContainer>
+            {featuredArticles.map(article => (
+              <SideBarArticleContainer key={featuredArticles.indexOf(article)}>
+                <SideBarArticleImage imageLoaded={article.imageLoaded} />
+                <SideBarArticleInfoContainer>
+                  <ReusableContentLoader
+                    // Title
+                    information={article.title}
+                    contentLoaded={article.imageLoaded}
+                    font={"inherit"}
+                    fontSize={"24px"}
+                    margin={"0px 0px 0px 0px"}
+                    color={"var(--color-white)"}
+                    backgroundColor={"rgba(232, 232, 232, 1)"}
+                    transparentColor={"rgba(232, 232, 232, 0)"}
+                    linearGradient={`linear-gradient(to right, #e8e8e8 4%, #ddd 18%, #e8e8e8 36%)`}
+                  />
+                  <ReusableContentLoader
+                    // Published / Updated Article Date
+                    information={`By ${new Date().toDateString(
+                      article.datePublished
+                    )}`}
+                    contentLoaded={article.imageLoaded}
+                    font={"inherit"}
+                    fontSize={"15px"}
+                    margin={"0px auto auto 0px"}
+                    whiteSpace={"nowrap"}
+                    color={"var(--color-white)"}
+                    backgroundColor={"rgba(232, 232, 232, 1)"}
+                    transparentColor={"rgba(232, 232, 232, 0)"}
+                    linearGradient={`linear-gradient(to right, #e8e8e8 4%, #ddd 18%, #e8e8e8 36%)`}
+                  />
+                </SideBarArticleInfoContainer>
+              </SideBarArticleContainer>
+            ))}
+          </RightContent>
+        </InnerContainer>
+      ))}
     </Container>
   );
 };
@@ -267,9 +415,8 @@ const Container = styled.div`
   height: 653px;
   width: 100%;
   display: flex;
-  flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   position: relative;
   overflow: hidden;
   @media (max-width: 935px) {
@@ -277,24 +424,61 @@ const Container = styled.div`
   }
 `;
 
-// const keyframesShimmer = keyframes`
-// 0% {
-//    transform: translateX(-100%);
-//  }
-//  100% {
-//    transform: translateX(100%);
-//  }
-// `;
+const InnerContainer = styled.div`
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  position: absolute;
+  overflow: hidden;
+  @media (max-width: 935px) {
+    height: 100vh;
+  }
+`;
 
-// const PlaceHolder = styled.img`
-//   position: absolute;
-//   width: 100%;
-//   height: 100%;
-//   top: 0;
-//   background: linear-gradient(to right, #ddd 4%, #e8e8e8 25%, #ddd 36%);
-//   z-index: -9999;
-//   animation: ${keyframesShimmer} 1.5s infinite ease-in-out;
-// `;
+const keyframesShimmer = keyframes`
+0% {
+   transform: translateX(-100%);
+ }
+ 100% {
+  transform: translateX(100%);
+ }
+`;
+
+const PlaceHolder = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  background: #ddd;
+  z-index: -99;
+  opacity: 1;
+  transition: all 0.7s ease-in-out;
+  position: relative;
+  &::after {
+    content: "";
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    filter: blur(5px);
+    background: linear-gradient(to right, #ddd 4%, #e8e8e8 18%, #ddd 36%);
+    animation: ${keyframesShimmer} 1s infinite ease-in-out;
+  }
+  ${props => !props.imageLoaded} {
+    background: transparent;
+    opacity: 0;
+    &::after {
+      background: transparent;
+      animation: none !important;
+    }
+  }
+`;
+
+const Internal = styled.div`
+  z-index: -99;
+`;
 
 const BackgroundImage = styled.div.attrs(props => ({
   style: {
@@ -312,8 +496,7 @@ const BackgroundImage = styled.div.attrs(props => ({
   height: 100%;
   top: 0;
   transition: all 1.9s linear;
-  background: url(${props => props.loadImage}), url(${props => props.image});
-  filter: blur(8px);
+  background: url(${props => props.image});
   background-position: center;
   z-index: -999;
   background-size: cover;
@@ -328,10 +511,6 @@ const BackgroundImage = styled.div.attrs(props => ({
   }
   ${props => !props.imageLoaded} {
     filter: blur(0px);
-    background: url(${props => props.image});
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
     animation: none;
   }
 `;
@@ -358,8 +537,8 @@ const Featured = styled.div`
 `;
 
 const FeaturedBox = styled.div`
-  transition: 0.3s;
-  background-color: var(--color-accent);
+  transition: 0.3s, background-color 0.3s ease-in-out;
+  background-color: rgba(232, 232, 232, 1);
   color: var(--color-white);
   width: 40px;
   height: 40px;
@@ -368,6 +547,30 @@ const FeaturedBox = styled.div`
   justify-content: center;
   overflow: hidden;
   position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    vertical-align: middle;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    filter: blur(5px);
+    background: linear-gradient(
+      to right,
+      rgba(232, 232, 232, 1) 4%,
+      #ddd 28%,
+      rgba(232, 232, 232, 1) 36%
+    );
+    animation: ${keyframesShimmer} 1s infinite ease-in-out;
+  }
+  ${props => !props.imageLoaded} {
+    background-color: var(--color-accent);
+    &::before {
+      filter: blur(0px);
+      background: transparent;
+      animation: none;
+    }
+  }
   ${props => props.articleSelected} {
     transition: all 0.3s;
     opacity: 1;
@@ -385,6 +588,7 @@ const ArticleNumber = styled.label`
   font-size: 16px;
   overflow: hidden;
   position: absolute;
+  z-index: 40;
   transform: translateX(0px);
   ${props => props.articleSelected} {
     transition: 0.3s;
@@ -406,25 +610,16 @@ const ArticleNumber = styled.label`
   }
 `;
 
-const FeaturedTitle = styled.div`
+const Line = styled.div`
   color: var(--color-white);
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  &::before {
-    content: "";
-    margin: 0rem 0.5rem;
-    vertical-align: middle;
-    display: inline-flex;
-    align-self: center;
-    background-color: currentColor;
-    height: 0.15rem;
-    width: 1rem;
-    opacity: 0.5;
-  }
-  &:hover {
-    cursor: default;
-  }
+  margin: 0rem 0.5rem;
+  vertical-align: middle;
+  display: inline-flex;
+  align-self: center;
+  background-color: currentColor;
+  height: 0.15rem;
+  width: 1rem;
+  opacity: 0.5;
 `;
 
 const ArticleInformation = styled.div.attrs(props => ({
@@ -457,6 +652,10 @@ const ArticleInformation = styled.div.attrs(props => ({
   margin-left: 50px;
   bottom: 130px;
   left: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-direction: column;
   transition: all 0.3s;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -466,35 +665,22 @@ const ArticleInformation = styled.div.attrs(props => ({
   }
 `;
 
-const Catergory = styled.span`
-  font-size: var(--font-size-xs);
-  letter-spacing: 0.2px;
-  color: var(--color-white);
+const AuthorDateContainer = styled.div`
+  display: flex;
+  flex-direction: row;
 `;
 
-const Title = styled.h2``;
-
-const AuthorDateContainer = styled.div``;
-
-const Author = styled.label`
-  color: rgba(255, 255, 255, 0.7);
-  &::after {
-    content: "";
-    margin: 0rem 0.5rem;
-    vertical-align: middle;
-    display: inline-flex;
-    align-self: center;
-    background-color: rgba(255, 255, 255, 0.7);
-    height: 0.25rem;
-    width: 0.25rem;
-    border-radius: 9999px;
-    opacity: 0.5;
-  }
-`;
-
-const ArticleDate = styled.label`
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: 500;
+const Dot = styled.div`
+  color: #e8e8e8;
+  background-color: #e8e8e8;
+  border-radius: 15px;
+  display: inline-flex;
+  align-self: center;
+  overflow: hidden;
+  height: 0.25rem;
+  width: 0.25rem;
+  margin: 0rem 0.5rem;
+  opacity: 0.5;
 `;
 
 const SwiperPaginationContainer = styled.div`
@@ -527,7 +713,8 @@ const SwiperPagination = styled.div`
 const RightContent = styled.div`
   box-sizing: border-box;
   width: 357.3px;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: #d8d8d8;
+  transition: all 0.3s ease-in-out;
   display: flex;
   flex-direction: column;
   padding: 32px;
@@ -535,16 +722,17 @@ const RightContent = styled.div`
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  ${props => !props.imageLoaded} {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
   @media (max-width: 935px) {
     display: none;
   }
 `;
 
-const SideBarTitle = styled.label`
-  font-size: var(--font-size-xl);
-  align-self: flex-start;
-  color: var(--color-white);
-  margin-bottom: 24px;
+const SidebarTitleContainer = styled.div`
+  display: flex;
+  align-items: flex-start;
 `;
 
 const SideBarArticleContainer = styled.div`
@@ -566,27 +754,40 @@ const SideBarArticleImage = styled.div`
   height: 100%;
   width: 89px;
   margin-right: 16px;
-  background-color: var(--main-background-color);
+  background-color: #e8e8e8;
+  transition: all 0.3s ease-in-out;
+  position: relative;
+  overflow: hidden;
   &:hover {
     cursor: pointer;
+  }
+  &::before {
+    content: "";
+    position: absolute;
+    vertical-align: middle;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    filter: blur(5px);
+    background: linear-gradient(to right, #e8e8e8 4%, #ddd 18%, #e8e8e8 36%);
+    animation: ${keyframesShimmer} 1s infinite ease-in-out;
+  }
+  ${props => !props.imageLoaded} {
+    background-color: var(--main-background-color);
+    &::before {
+      filter: blur(0px);
+      background: transparent;
+      animation: none;
+    }
   }
 `;
 
 const SideBarArticleInfoContainer = styled.div`
   height: 100%;
   width: 75%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
   text-align: left;
-`;
-
-const SideBarArticleTitle = styled.h4`
-  margin: 0;
-  color: var(--color-white);
-  &:hover {
-    cursor: pointer;
-    color: rgba(255, 255, 255, 0.7);
-  }
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  align-items: flex-start;
 `;
