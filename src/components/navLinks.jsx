@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import arrowIcon from "../images/arrow.svg";
 import { useHistory } from "react-router-dom";
+import _ from "lodash";
 
 const NavLinks = props => {
   const history = useHistory();
+  const [closeDropDown, setCloseDropDown] = useState(false);
   const [links] = useState([
     {
       title: "Electronics",
@@ -48,7 +50,16 @@ const NavLinks = props => {
   ]);
 
   const handleLinkRoute = subLink => {
-    history.push(subLink.link, { subLink: subLink.title });
+    history.push(subLink.link, {
+      subLink: subLink.title
+    });
+    if (history.location.pathname === subLink.link) {
+      handleDropDownClosure(true);
+    }
+  };
+
+  const handleDropDownClosure = BooleanValue => {
+    setCloseDropDown(BooleanValue);
   };
 
   return (
@@ -56,6 +67,7 @@ const NavLinks = props => {
       {links.map(link => (
         <Links key={links.indexOf(link)} data-testid="navLinks">
           <Link
+            onMouseOver={() => handleDropDownClosure(false)}
             data-testid={`navLink${link.title}`}
             name={link.title}
             key={links.indexOf(link)}
@@ -64,7 +76,7 @@ const NavLinks = props => {
             {link.title}
           </Link>
           <DropdownContainer
-            dropdownOpen={link.dropdownOpen}
+            closeDropDown={closeDropDown}
             data-testid={`sideBar${link.title}Dropdown`}
           >
             {link.subLinks.map(subLink => (
@@ -99,6 +111,7 @@ const DropdownContainer = styled.div`
   position: absolute;
   background-color: var(--bg-color-dropdown);
   margin-top: 40px;
+  z-index: 1;
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.04);
   max-height: 800px;
   padding: 16px 0px;
@@ -107,6 +120,10 @@ const DropdownContainer = styled.div`
   overflow: hidden;
   &:hover {
     visibility: visible;
+  }
+  ${props => !props.closeDropDown} {
+    visibility: hidden;
+    display: none;
   }
 `;
 
