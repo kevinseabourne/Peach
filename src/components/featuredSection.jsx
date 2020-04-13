@@ -5,7 +5,7 @@ import _ from "lodash";
 import { getAllArticles } from "../components/services/articleService";
 import ReusableContentLoader from "./common/ReusableContentLoader";
 
-const SliderSection = props => {
+const FeaturedSection = props => {
   const ref = useRef(null);
   const [mouseDownPosition, setMouseDownPosition] = useState(null);
   const [mouseDown, setMouseDown] = useState(false);
@@ -409,7 +409,7 @@ const SliderSection = props => {
   );
 };
 
-export default SliderSection;
+export default FeaturedSection;
 
 const Container = styled.div`
   height: 653px;
@@ -462,7 +462,7 @@ const PlaceHolder = styled.div`
     width: 100%;
     height: 100%;
     position: absolute;
-    filter: blur(5px);
+    filter: blur(10px);
     background: linear-gradient(to right, #ddd 4%, #e8e8e8 18%, #ddd 36%);
     animation: ${keyframesShimmer} 1s infinite ease-in-out;
   }

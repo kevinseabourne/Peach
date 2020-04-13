@@ -30,7 +30,7 @@ const BottomHeader = props => {
         >
           <BurgerInner id="ResponsiveBurgerInner" burgerMenu={burgerMenu} />
         </ResponsiveBurgerMenu>
-        <NavLinks sideBar={false} />
+        <NavLinks />
         <SearchBurgerContainer>
           <HeaderSearch />
           <BurgerMenu
