@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import arrowIcon from "../images/arrow.svg";
 import { useHistory } from "react-router-dom";
-import _ from "lodash";
 
 const NavLinks = props => {
   const history = useHistory();
@@ -53,9 +52,7 @@ const NavLinks = props => {
     history.push(subLink.link, {
       subLink: subLink.title
     });
-    if (history.location.pathname === subLink.link) {
-      handleDropDownClosure(true);
-    }
+    handleDropDownClosure(true);
   };
 
   const handleDropDownClosure = BooleanValue => {
@@ -68,7 +65,7 @@ const NavLinks = props => {
         <Links key={links.indexOf(link)} data-testid="navLinks">
           <Link
             onMouseOver={() => handleDropDownClosure(false)}
-            data-testid={`navLink${link.title}`}
+            data-testid={`navBar${link.title}Link`}
             name={link.title}
             key={links.indexOf(link)}
             icon={arrowIcon}
@@ -77,7 +74,7 @@ const NavLinks = props => {
           </Link>
           <DropdownContainer
             closeDropDown={closeDropDown}
-            data-testid={`sideBar${link.title}Dropdown`}
+            data-testid={`navBar${link.title}Dropdown`}
           >
             {link.subLinks.map(subLink => (
               <SubLinks
