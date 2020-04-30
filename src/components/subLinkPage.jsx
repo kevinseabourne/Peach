@@ -17,7 +17,7 @@ const SubLinkPage = props => {
   }, [location.state]);
 
   return (
-    <Container data-testid={`subLink${subLinkPageData.subLink}Page`}>
+    <Container data-testid={`${subLinkPageData.subLink}ArticlesPage`}>
       <Wrapper>{subLinkPageData.subLink}</Wrapper>
     </Container>
   );
