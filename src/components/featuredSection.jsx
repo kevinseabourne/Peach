@@ -1,3 +1,4 @@
+// /* istanbul ignore file */
 import React, { useState, useEffect, useRef } from "react";
 import styled, { keyframes } from "styled-components";
 import LazyLoad from "react-lazyload";
@@ -7,6 +8,7 @@ import ReusableContentLoader from "./common/ReusableContentLoader";
 
 const FeaturedSection = props => {
   const ref = useRef(null);
+  const timer = useRef(null);
   const [mouseDownPosition, setMouseDownPosition] = useState(null);
   const [mouseDown, setMouseDown] = useState(false);
   const [fadeIn, setFadeIn] = useState(null);
@@ -15,19 +17,21 @@ const FeaturedSection = props => {
   const [translateYOut, setTranslateYOut] = useState(null);
   const [dragAnimation, setDragAnimation] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState("");
-  const [allArticles, setAllArticles] = useState([]);
   const [featuredArticles, setFeaturedArticles] = useState([]);
-  const timer = useRef(null);
+  const [dataStatus, setDataStatus] = useState("idle");
 
   useEffect(() => {
     async function fetchData() {
-      const { data } = await getAllArticles();
-
-      setAllArticles(data);
-      handleFeaturedArticles(data);
+      const response = await getAllArticles();
+      if (response) {
+        const { data } = response;
+        handleFeaturedArticles(data);
+        setDataStatus("resolved");
+      }
     }
     fetchData();
     return () => {
+      getAllArticles("cancel");
       timer.current && clearTimeout(timer.current);
     };
   }, []);
@@ -85,7 +89,7 @@ const FeaturedSection = props => {
         return article;
       });
       setFeaturedArticles(updatedFeaturedArticles);
-    }, 2800);
+    }, 2000);
   };
 
   const handleArticleSwipeChange = swipe => {
@@ -211,38 +215,46 @@ const FeaturedSection = props => {
     setTranslateYOut(null);
   };
 
-  return (
+  return dataStatus === "idle" ? (
+    <div data-testid="loading"></div>
+  ) : (
     <Container
       ref={ref}
       onMouseDown={e => handleMouseDown(e)}
       onMouseMove={e => mouseDown && handleDragging(e)}
       onMouseUp={e => handleMouseUp(e)}
       onMouseLeave={e => mouseDown && handleMouseOut(e)}
-      data-testid="carousel-container"
+      data-testid={`carousel-container`}
     >
       {featuredArticles.map(article => (
-        <InnerContainer key={article.id}>
+        <InnerContainer
+          data-testid={
+            article.imageLoaded
+              ? `${article.title} content Loaded`
+              : `${article.title} content Loading`
+          }
+          role="article"
+          key={article.id}
+        >
           <LazyLoad key={article.id} once={true} height={653} offset={100}>
-            <BackgroundImage
-              key={article.id}
-              image={article.image[1]}
-              loadImage={`${article.image[0]}&w=1302`}
-              imageLoaded={article.imageLoaded}
-              articleSelected={article.selected}
-              animationDirection={article.animationDirection}
-              dragAnimation={mouseDown}
-              fadeIn={fadeIn}
-              fadeOut={fadeOut}
-              data-testid={`${article.title} background-image`}
-            >
-              <PlaceHolder imageLoaded={article.imageLoaded}>
-                <Internal />
-              </PlaceHolder>
-            </BackgroundImage>
-            <ImageLoader
-              src={article.image[1]}
-              onLoad={() => onImageLoad(article, featuredArticles)}
-            />
+            <PlaceHolder imageLoaded={article.imageLoaded}>
+              <BackgroundImage
+                key={article.id}
+                src={`${article.image[1]}?w=1400&h=680`}
+                srcSet={`${article.image[1]}?w=4000&h=2680 935w, ${
+                  article.image[1]
+                }?w=1400&h=680 936w`}
+                onLoad={() => onImageLoad(article, featuredArticles)}
+                alt={article.title}
+                imageLoaded={article.imageLoaded}
+                articleSelected={article.selected}
+                animationDirection={article.animationDirection}
+                dragAnimation={mouseDown}
+                fadeIn={fadeIn}
+                fadeOut={fadeOut}
+                data-testid={`${article.title} background-image`}
+              ></BackgroundImage>
+            </PlaceHolder>
           </LazyLoad>
           <LeftContent>
             <Featured>
@@ -342,16 +354,6 @@ const FeaturedSection = props => {
                 />
               </AuthorDateContainer>
             </ArticleInformation>
-            <SwiperPaginationContainer>
-              {featuredArticles.map(fpArticle => (
-                <SwiperPagination
-                  key={fpArticle.id}
-                  data-testid={`${fpArticle.title}pagination-dot`}
-                  articleSelected={fpArticle.selected}
-                  onClick={() => handleFeaturedArticleChange(fpArticle)}
-                />
-              ))}
-            </SwiperPaginationContainer>
           </LeftContent>
           <RightContent imageLoaded={article.imageLoaded}>
             <SidebarTitleContainer>
@@ -405,6 +407,16 @@ const FeaturedSection = props => {
           </RightContent>
         </InnerContainer>
       ))}
+      <SwiperPaginationContainer>
+        {featuredArticles.map(fpArticle => (
+          <SwiperPagination
+            key={fpArticle.id}
+            data-testid={`${fpArticle.title}pagination-dot`}
+            articleSelected={fpArticle.selected}
+            onClick={() => handleFeaturedArticleChange(fpArticle)}
+          />
+        ))}
+      </SwiperPaginationContainer>
     </Container>
   );
 };
@@ -451,9 +463,9 @@ const PlaceHolder = styled.div`
   position: absolute;
   width: 100%;
   height: 100%;
-  top: 0;
   background: #ddd;
   z-index: -99;
+  overflow: hidden;
   opacity: 1;
   transition: all 0.7s ease-in-out;
   position: relative;
@@ -468,7 +480,7 @@ const PlaceHolder = styled.div`
   }
   ${props => !props.imageLoaded} {
     background: transparent;
-    opacity: 0;
+    opacity: 1;
     &::after {
       background: transparent;
       animation: none !important;
@@ -476,11 +488,7 @@ const PlaceHolder = styled.div`
   }
 `;
 
-const Internal = styled.div`
-  z-index: -99;
-`;
-
-const BackgroundImage = styled.div.attrs(props => ({
+const BackgroundImage = styled.img.attrs(props => ({
   style: {
     opacity: props.articleSelected
       ? !props.dragAnimation
@@ -494,13 +502,11 @@ const BackgroundImage = styled.div.attrs(props => ({
   position: absolute;
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  object-position: center center;
   top: 0;
-  transition: all 1.9s linear;
-  background: url(${props => props.image});
-  background-position: center;
-  z-index: -999;
-  background-size: cover;
-  background-repeat: no-repeat;
+  transition: all 0.7s ease-in-out;
+  z-index: 99;
   ${props => props.articleSelected} {
     opacity: 0;
     transition: all 0.7s;
@@ -515,11 +521,8 @@ const BackgroundImage = styled.div.attrs(props => ({
   }
 `;
 
-const ImageLoader = styled.img`
-  display: none;
-`;
-
 const LeftContent = styled.div`
+  position: absolute;
   height: 540px;
   margin-left: 50px;
   display: flex;
@@ -537,7 +540,7 @@ const Featured = styled.div`
 `;
 
 const FeaturedBox = styled.div`
-  transition: 0.3s, background-color 0.3s ease-in-out;
+  transition: 0.3s, background-color 0.4s ease;
   background-color: rgba(232, 232, 232, 1);
   color: var(--color-white);
   width: 40px;
@@ -648,10 +651,7 @@ const ArticleInformation = styled.div.attrs(props => ({
   }
 }))`
   color: var(--color-white);
-  position: absolute;
-  margin-left: 50px;
-  bottom: 130px;
-  left: 0;
+  margin-bottom: 80px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -660,9 +660,6 @@ const ArticleInformation = styled.div.attrs(props => ({
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  @media (max-width: 935px) {
-    bottom: 220px;
-  }
 `;
 
 const AuthorDateContainer = styled.div`
@@ -687,6 +684,10 @@ const SwiperPaginationContainer = styled.div`
   display: flex;
   flex-direction: row;
   z-index: 2;
+  margin-right: auto;
+  margin-top: auto;
+  margin-bottom: 72px;
+  margin-left: 50px;
 `;
 
 const SwiperPagination = styled.div`
@@ -695,7 +696,7 @@ const SwiperPagination = styled.div`
   border-radius: 100%;
   margin: 0px 4px;
   background-color: var(--dark-border-color-strong);
-  transition-duration: 500ms;
+  transition: all 0.5s ease-in-out;
   &:first-child {
     margin: 0px;
   }
@@ -712,6 +713,8 @@ const SwiperPagination = styled.div`
 
 const RightContent = styled.div`
   box-sizing: border-box;
+  position: absolute;
+  right: 0;
   width: 357.3px;
   background-color: #d8d8d8;
   transition: all 0.3s ease-in-out;
