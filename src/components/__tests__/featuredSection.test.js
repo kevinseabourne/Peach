@@ -1,7 +1,7 @@
 import React from "react";
 import FeaturedSection from "../featuredSection";
 import { render, wait, act } from "@testing-library/react";
-import { getAllArticles, data } from "../services/articleService";
+import { getAllArticles, mockData } from "../services/articleService";
 import { Router } from "react-router-dom";
 import { createMemoryHistory } from "history";
 
@@ -24,7 +24,7 @@ afterAll(() => {
 
 describe("Featured Section", () => {
   it("renders data from mocked axios call and when the component unmounts the http request is canceled", async () => {
-    getAllArticles.mockResolvedValue({ data: data });
+    getAllArticles.mockResolvedValue({ data: mockData });
 
     const { unmount, getByTestId, getAllByRole } = render(<FeaturedSection />);
 

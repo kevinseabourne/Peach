@@ -1,8 +1,9 @@
-// /* istanbul ignore file */
 import axios from "axios";
 import logger from "./logService";
 import { toast } from "react-toastify";
 
+/* istanbul ignore file */
+// - tested in Cypress - //
 axios.interceptors.response.use(null, error => {
   if (axios.isCancel(error)) {
     // ignore
@@ -12,7 +13,7 @@ axios.interceptors.response.use(null, error => {
     error.response.status < 500
   ) {
     logger.log(error);
-    toast("An unexpected error has occurred", {
+    toast.error("An error has occurred", {
       position: "top-right",
       autoClose: 5000,
       hideProgressBar: false,
@@ -23,3 +24,10 @@ axios.interceptors.response.use(null, error => {
     return Promise.reject(error);
   }
 });
+
+export default {
+  get: axios.get,
+  post: axios.post,
+  put: axios.put,
+  delete: axios.delete
+};

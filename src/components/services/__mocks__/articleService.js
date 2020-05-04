@@ -1,4 +1,4 @@
-export const data = [
+export const mockData = [
   {
     category: "Routers Mock",
     section: "Electronics",

@@ -10,21 +10,12 @@ import Footer from "./components/footer";
 import NotFound from "./components/notFound";
 import styled from "styled-components";
 import "./App.css";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
     <React.Fragment>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnVisibilityChange
-        draggable
-        pauseOnHover
-      />
+      <ToastContainer />
       <main>
         <Header />
         <Container>
